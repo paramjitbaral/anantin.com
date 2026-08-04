@@ -1,10 +1,11 @@
 'use client'
-import { Search, ShoppingCart } from "lucide-react";
+import { Search, ShoppingCart, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { supabase } from "@/lib/supabaseClient";
 
 const Navbar = () => {
 
@@ -14,6 +15,7 @@ const Navbar = () => {
 
     const [search, setSearch] = useState('')
     const cartCount = useSelector(state => state.cart.total)
+    const [user, setUser] = useState(null)
 
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -25,8 +27,22 @@ const Navbar = () => {
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
         handleScroll();
+        
+        // Check for logged in user
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        localStorage.removeItem('user');
+        setUser(null);
+        router.refresh(); // Refresh to clear state in other components if needed
+    }
 
     const handleSearch = (e) => {
         e.preventDefault()
@@ -55,12 +71,12 @@ const Navbar = () => {
                     </Link>
 
                     {/* Desktop Menu */}
-                    <div className={`hidden sm:flex items-center gap-4 lg:gap-8 transition-colors duration-300 ${isLightText ? 'text-[#FDFBF7] drop-shadow-sm' : 'text-[#2C241B]'}`}>
+                    <div className={`hidden lg:flex items-center gap-4 lg:gap-8 transition-colors duration-300 ${isLightText ? 'text-[#FDFBF7] drop-shadow-sm' : 'text-[#2C241B]'}`}>
                         <Link href="/" className={`transition tracking-widest uppercase text-[13px] font-extrabold ${isLightText ? 'hover:text-[#D4B26F]' : 'hover:text-black'}`}>Home</Link>
                         <Link href="/shop" className={`transition tracking-widest uppercase text-[13px] font-extrabold ${isLightText ? 'hover:text-[#D4B26F]' : 'hover:text-black'}`}>Shop</Link>
-                        <Link href="/" className={`transition tracking-widest uppercase text-[13px] font-extrabold ${isLightText ? 'hover:text-[#D4B26F]' : 'hover:text-black'}`}>About</Link>
-                        <Link href="/" className={`transition tracking-widest uppercase text-[13px] font-extrabold ${isLightText ? 'hover:text-[#D4B26F]' : 'hover:text-black'}`}>Contact</Link>
-
+                        <Link href="/about" className={`transition tracking-widest uppercase text-[13px] font-extrabold ${isLightText ? 'hover:text-[#D4B26F]' : 'hover:text-black'}`}>About</Link>
+                        <Link href="/contact" className={`transition tracking-widest uppercase text-[13px] font-extrabold ${isLightText ? 'hover:text-[#D4B26F]' : 'hover:text-black'}`}>Contact</Link>
+                        
                         <form onSubmit={handleSearch} className={`hidden xl:flex items-center w-xs text-sm gap-2 px-4 py-2.5 rounded-full border transition-all duration-300 ${isLightText ? 'bg-[#1E1914]/80 border-[#D4B26F]/30 backdrop-blur-sm' : 'bg-[#2C241B]/10 border-[#2C241B]/20'}`}>
                             <Search size={16} className={`transition-colors duration-300 ${isLightText ? 'text-[#D4B26F]' : 'text-[#2C241B]'}`} />
                             <input className={`w-full bg-transparent outline-none text-xs transition-colors duration-300 ${isLightText ? 'placeholder-[#8C8A85] text-[#FDFBF7]' : 'placeholder-[#2C241B]/60 text-[#2C241B]'}`} type="text" placeholder="Search products" value={search} onChange={(e) => setSearch(e.target.value)} required />
@@ -72,17 +88,37 @@ const Navbar = () => {
                             <button className={`absolute -top-1 left-2.5 text-[8px] font-bold size-3.5 rounded-full transition-all duration-300 ${isLightText ? 'text-[#2C241B] bg-[#D4B26F]' : 'text-[#FAF8F5] bg-[#2C241B]'}`}>{cartCount}</button>
                         </Link>
 
-                        <button onClick={() => router.push('/login')} className={`px-7 py-2.5 transition tracking-widest uppercase text-[13px] font-extrabold rounded-full duration-300 shadow-md ${isLightText ? 'bg-[#D4B26F] hover:bg-[#C3A160] text-[#1E1914]' : 'bg-[#2C241B] hover:bg-[#1E1914] text-white'}`}>
-                            Login
-                        </button>
+                        {user ? (
+                            <div className="flex items-center gap-3">
+                                <Link href="/profile" className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 hover:scale-105 cursor-pointer ${isLightText ? 'bg-[#1E1914]/80 border-[#D4B26F]/30 backdrop-blur-sm text-[#FDFBF7]' : 'bg-[#2C241B]/10 border-[#2C241B]/20 text-[#2C241B]'}`}>
+                                    <User size={16} className={isLightText ? 'text-[#D4B26F]' : 'text-[#2C241B]'} />
+                                    <span className="text-xs font-bold tracking-wider">
+                                        {user.name ? user.name.split(' ')[0] : (user.user_metadata?.name || user.user_metadata?.full_name)?.split(' ')[0] || 'Profile'}
+                                    </span>
+                                </Link>
+                                <button onClick={handleLogout} className={`p-2.5 rounded-full transition-all duration-300 shadow-sm ${isLightText ? 'bg-[#D4B26F] hover:bg-red-600 hover:text-white text-[#1E1914]' : 'bg-[#2C241B] hover:bg-red-600 hover:text-white text-white'}`}>
+                                    <LogOut size={16} />
+                                </button>
+                            </div>
+                        ) : (
+                            <button onClick={() => router.push('/login')} className={`px-7 py-2.5 transition tracking-widest uppercase text-[13px] font-extrabold rounded-full duration-300 shadow-md ${isLightText ? 'bg-[#D4B26F] hover:bg-[#C3A160] text-[#1E1914]' : 'bg-[#2C241B] hover:bg-[#1E1914] text-white'}`}>
+                                Login
+                            </button>
+                        )}
 
                     </div>
 
                     {/* Mobile User Button  */}
                     <div className="sm:hidden">
-                        <button onClick={() => router.push('/login')} className={`px-6 py-2 transition tracking-widest uppercase text-xs font-bold rounded-full duration-300 ${isLightText ? 'bg-[#D4B26F] hover:bg-[#C3A160] text-[#1E1914]' : 'bg-[#2C241B] hover:bg-[#1E1914] text-white'}`}>
-                            Login
-                        </button>
+                        {user ? (
+                            <button onClick={handleLogout} className={`p-2.5 rounded-full transition-all duration-300 shadow-sm ${isLightText ? 'bg-[#D4B26F] hover:bg-red-600 hover:text-white text-[#1E1914]' : 'bg-[#2C241B] hover:bg-red-600 hover:text-white text-white'}`}>
+                                <LogOut size={16} />
+                            </button>
+                        ) : (
+                            <button onClick={() => router.push('/login')} className={`px-6 py-2 transition tracking-widest uppercase text-xs font-bold rounded-full duration-300 ${isLightText ? 'bg-[#D4B26F] hover:bg-[#C3A160] text-[#1E1914]' : 'bg-[#2C241B] hover:bg-[#1E1914] text-white'}`}>
+                                Login
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

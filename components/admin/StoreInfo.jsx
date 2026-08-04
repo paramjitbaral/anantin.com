@@ -3,23 +3,21 @@ import Image from "next/image"
 import { MapPin, Mail, Phone, ExternalLink, Calendar, User } from "lucide-react"
 import toast from "react-hot-toast"
 
-const StoreInfo = ({ store, toggleIsActive }) => {
+const StoreInfo = ({ store, toggleIsActive, onDelete }) => {
     return (
         <div className="flex flex-col h-full bg-white relative">
             
             {/* Professional Header Section */}
             <div className="p-6 border-b border-[#EAE5DB] bg-[#FDFBF7] flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                    {/* Structured Logo Box */}
-                    <div className="w-12 h-12 bg-white rounded-lg border border-[#EAE5DB] p-1.5 flex items-center justify-center shadow-sm">
-                        <div className="relative w-full h-full">
-                            <Image 
-                                fill 
-                                src={store.logo || "/shop%20icon.png"} 
-                                alt={store.name} 
-                                className={`object-contain ${!store.logo && 'opacity-40'}`} 
-                            />
-                        </div>
+                    {/* Just the Icon */}
+                    <div className="relative w-12 h-12">
+                        <img 
+                            src={(!store.logo || typeof store.logo !== 'string' || store.logo === 'null' || store.logo === 'undefined' || store.logo.includes('placeholder')) ? "/shop_icon.png" : store.logo} 
+                            alt={store.name} 
+                            onError={(e) => { e.target.onerror = null; e.target.src = "/shop_icon.png" }}
+                            className="object-contain w-full h-full drop-shadow-md mix-blend-multiply" 
+                        />
                     </div>
                     
                     {/* Header Details */}
@@ -98,12 +96,24 @@ const StoreInfo = ({ store, toggleIsActive }) => {
                         </div>
                     </div>
 
-                    {/* Date */}
-                    <div className="flex items-center gap-1.5 text-[#8b795a]">
-                        <Calendar size={13} />
-                        <span className="text-[11px] font-medium">
-                            {new Date(store.createdAt).toLocaleDateString()}
-                        </span>
+                    <div className="flex items-center gap-4">
+                        {/* Date */}
+                        <div className="flex items-center gap-1.5 text-[#8b795a]">
+                            <Calendar size={13} />
+                            <span className="text-[11px] font-medium">
+                                {new Date(store.createdAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                        
+                        {/* Delete Button */}
+                        {onDelete && (
+                            <button 
+                                onClick={onDelete}
+                                className="text-[10px] uppercase font-bold tracking-widest text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded transition-colors"
+                            >
+                                Delete
+                            </button>
+                        )}
                     </div>
                 </div>
 

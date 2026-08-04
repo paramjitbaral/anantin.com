@@ -1,28 +1,55 @@
 'use client'
-import { addProduct, getDemoStoreId } from "@/actions/supplier"
-import { assets } from "@/assets/assets"
+import { addProduct, getLoggedInStoreId } from "@/actions/supplier"
+import { supabase } from "@/lib/supabaseClient"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { Suspense, useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { toast } from "react-hot-toast"
 
 export default function StoreAddProduct() {
+    return (
+        <Suspense fallback={<div className="flex justify-center p-8"><span className="text-[#8b795a]">Loading...</span></div>}>
+            <AddProductForm />
+        </Suspense>
+    )
+}
+
+function AddProductForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const categories = ['Cotton Fabric', 'Linen Fabric', 'Silk Fabric', 'Denim Fabric', 'Polyester Fabric', 'Rayon Fabric', 'Wool Fabric', 'Satin Fabric', 'Chiffon Fabric', 'Canvas Fabric', 'Terry Cloth', 'Velvet Fabric']
 
     const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null })
     const [productInfo, setProductInfo] = useState({
-        name: "",
-        description: "",
-        mrp: "",
-        price: "",
-        category: "",
-        colors: "",
-        gsm: "",
-        width: "",
-        material: "",
-        availableStock: "",
+        name: searchParams.get('name') || "",
+        description: searchParams.get('description') || "",
+        mrp: searchParams.get('mrp') || "",
+        price: searchParams.get('price') || "",
+        category: searchParams.get('category') || "",
+        colors: searchParams.get('colors') || "",
+        gsm: searchParams.get('gsm') || "",
+        width: searchParams.get('width') || "",
+        material: searchParams.get('material') || "",
+        availableStock: searchParams.get('stock') || "",
     })
+
+    // If query params change (e.g. from AI navigation while on page), update state
+    useEffect(() => {
+        setProductInfo(prev => ({
+            ...prev,
+            name: searchParams.get('name') || prev.name,
+            description: searchParams.get('description') || prev.description,
+            mrp: searchParams.get('mrp') || prev.mrp,
+            price: searchParams.get('price') || prev.price,
+            category: searchParams.get('category') || prev.category,
+            colors: searchParams.get('colors') || prev.colors,
+            gsm: searchParams.get('gsm') || prev.gsm,
+            width: searchParams.get('width') || prev.width,
+            material: searchParams.get('material') || prev.material,
+            availableStock: searchParams.get('stock') || prev.availableStock,
+        }))
+    }, [searchParams])
     const [loading, setLoading] = useState(false)
 
     const onChangeHandler = (e) => {
@@ -34,19 +61,48 @@ export default function StoreAddProduct() {
         setLoading(true)
         
         try {
-            const storeId = await getDemoStoreId()
+            const storeId = await getLoggedInStoreId()
             if (!storeId) {
                 toast.error("Store not found. Please log in.")
                 setLoading(false)
                 return
             }
 
-            // Mocking image upload - passing dummy URLs for now
-            const mockImageUrls = Object.values(images).filter(i => i !== null).map(() => "https://via.placeholder.com/300")
+            // Upload images to Supabase
+            const uploadedUrls = [];
+            for (const key of Object.keys(images)) {
+                if (images[key]) {
+                    const file = images[key];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    
+                    const { data, error } = await supabase.storage
+                        .from('products')
+                        .upload(fileName, file);
+                    
+                    if (error) {
+                        toast.error(`Failed to upload image: ${error.message}`);
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    const { data: publicUrlData } = supabase.storage
+                        .from('products')
+                        .getPublicUrl(fileName);
+                        
+                    uploadedUrls.push(publicUrlData.publicUrl);
+                }
+            }
+
+            if (uploadedUrls.length === 0) {
+                toast.error("Please upload at least one image");
+                setLoading(false);
+                return;
+            }
             
             const data = {
                 ...productInfo,
-                images: mockImageUrls,
+                images: uploadedUrls,
                 colors: productInfo.colors ? productInfo.colors.split(',').map(c => c.trim()) : []
             }
 
@@ -71,12 +127,12 @@ export default function StoreAddProduct() {
                 
                 {/* Form Section */}
 
-                <form onSubmit={onSubmitHandler} className="bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-[#EAE5DB] overflow-hidden flex flex-col">
-                    <div className="px-6 py-4 border-b border-[#F0EBE1] bg-[#FDFBF7]">
+                <form onSubmit={onSubmitHandler} className="flex flex-col">
+                    <div className="px-6 py-4">
                         <h2 className="text-xl font-serif font-semibold text-[#2C241B]">Product Details</h2>
                     </div>
 
-                    <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Left Column */}
                         <div className="flex flex-col gap-4">
                             

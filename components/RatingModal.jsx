@@ -4,21 +4,47 @@ import { Star } from 'lucide-react';
 import React, { useState } from 'react'
 import { XIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { submitReview } from '@/actions/review';
 
-const RatingModal = ({ ratingModal, setRatingModal }) => {
+const RatingModal = ({ ratingModal, setRatingModal, onReviewSuccess }) => {
 
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState('');
 
     const handleSubmit = async () => {
         if (rating < 0 || rating > 5) {
-            return toast('Please select a rating');
+            toast.error('Please select a rating');
+            throw new Error('Rating needed');
         }
         if (review.length < 5) {
-            return toast('write a short review');
+            toast.error('Write a short review');
+            throw new Error('Review too short');
         }
 
-        setRatingModal(null);
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            toast.error('Please log in');
+            throw new Error('Not logged in');
+        }
+        const user = JSON.parse(userStr);
+
+        const res = await submitReview({
+            userId: user.id,
+            productId: ratingModal.productId,
+            orderId: ratingModal.orderId,
+            rating,
+            review
+        });
+
+        if (res.success) {
+            toast.success("Review submitted!");
+            setRatingModal(null);
+            if (onReviewSuccess) onReviewSuccess();
+            return res;
+        } else {
+            toast.error(res.error);
+            throw new Error(res.error);
+        }
     }
 
     return (

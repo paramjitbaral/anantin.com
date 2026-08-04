@@ -1,24 +1,62 @@
 'use client'
-import { Suspense, useState, useMemo } from "react"
+import { Suspense, useState, useMemo, useEffect } from "react"
 import ProductCard from "@/components/ProductCard"
 import { MoveLeftIcon, Filter, ChevronDown, Check, Search } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { setProduct } from "@/lib/features/product/productSlice"
+import { getAllProducts } from "@/actions/product"
 
 function ShopContent() {
     const searchParams = useSearchParams()
     const urlSearch = searchParams.get('search')
     const urlCategory = searchParams.get('category')
+    const urlColor = searchParams.get('color')
+    const urlGsm = searchParams.get('gsm')
+    const urlMaxPrice = searchParams.get('maxPrice')
     const router = useRouter()
+    const dispatch = useDispatch()
 
     const products = useSelector(state => state.product.list)
     
+    // Fallback: if Redux store is empty, fetch products directly
+    useEffect(() => {
+        if (!products || products.length === 0) {
+            getAllProducts().then(data => {
+                if (data && data.length > 0) {
+                    dispatch(setProduct(data))
+                }
+            })
+        }
+    }, [products, dispatch])
+    
     // Filters State
     const [selectedCategories, setSelectedCategories] = useState(urlCategory && urlCategory !== 'All' ? [urlCategory] : [])
-    const [selectedColors, setSelectedColors] = useState([])
-    const [selectedGsms, setSelectedGsms] = useState([])
-    const [maxPriceFilter, setMaxPriceFilter] = useState(0)
+    const [selectedColors, setSelectedColors] = useState(urlColor ? [urlColor] : [])
+    const [selectedGsms, setSelectedGsms] = useState(urlGsm ? [urlGsm] : [])
+    const [maxPriceFilter, setMaxPriceFilter] = useState(urlMaxPrice ? Number(urlMaxPrice) : 0)
     const [sortBy, setSortBy] = useState('relevance')
+    
+    // Sync URL Filters to State and Hide from URL bar
+    useEffect(() => {
+        let hasFilters = false
+        if (urlCategory && urlCategory !== 'All') {
+            setSelectedCategories([urlCategory])
+            hasFilters = true
+        } else if (!urlCategory) {
+            setSelectedCategories([])
+        }
+        
+        if (urlColor) { setSelectedColors([urlColor]); hasFilters = true; }
+        if (urlGsm) { setSelectedGsms([urlGsm]); hasFilters = true; }
+        if (urlMaxPrice) { setMaxPriceFilter(Number(urlMaxPrice)); hasFilters = true; }
+        if (urlSearch) { hasFilters = true; }
+
+        // Clean the URL bar so users don't see the messy parameters
+        if (hasFilters && typeof window !== 'undefined') {
+            window.history.replaceState(null, '', '/shop')
+        }
+    }, [urlCategory, urlColor, urlGsm, urlMaxPrice, urlSearch])
     
     // Extract unique filter options from products
     const { categories, colors, gsms, maxProductPrice } = useMemo(() => {
@@ -57,7 +95,19 @@ function ShopContent() {
 
         // 1. Search Query Filter
         if (urlSearch) {
-            result = result.filter(p => p.name.toLowerCase().includes(urlSearch.toLowerCase()))
+            const stopWords = new Set(['cloths', 'clothes', 'cloth', 'fabric', 'fabrics', 'for', 'me', 'find', 'show', 'please', 'open', 'get', 'a', 'the', 'item', 'items']);
+            const words = urlSearch.toLowerCase().split(/\s+/).filter(w => w && !stopWords.has(w));
+            
+            if (words.length > 0) {
+                result = result.filter(p => {
+                    const text = `${p.name || ''} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+                    // Use word boundaries so 'silk' doesn't match 'silky'
+                    return words.some(w => {
+                        const regex = new RegExp(`\\b${w.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\b`, 'i');
+                        return regex.test(text);
+                    });
+                });
+            }
         }
 
         // 2. Category Filter

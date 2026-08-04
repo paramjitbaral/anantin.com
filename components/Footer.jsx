@@ -25,7 +25,7 @@ const Footer = () => {
             title: "EXPLORE",
             links: [
                 { text: "Home", path: '/', icon: null },
-                { text: "Privacy Policy", path: '/', icon: null },
+                { text: "Privacy Policy", path: '/privacy-policy', icon: null },
                 { text: "Store Login", path: '/store', icon: null },
                 { text: "Create Your Store", path: '/create-store', icon: null },
             ]
@@ -48,7 +48,7 @@ const Footer = () => {
     ]
 
     return (
-        <footer className="mx-6 bg-[#2C241B] rounded-t-2xl">
+        <footer className="bg-[#2C241B]">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-[#3F332A] text-[#EAE0D5]">
                     <div>

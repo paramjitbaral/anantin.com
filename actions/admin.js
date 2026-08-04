@@ -120,3 +120,20 @@ export async function updateStoreStatus(storeId, newStatus) {
         return { success: false, error: error.message }
     }
 }
+
+export async function deleteStoreById(storeId) {
+    try {
+        if (!process.env.DATABASE_URL) {
+            throw new Error("DATABASE_URL is not configured.")
+        }
+
+        await prisma.store.delete({
+            where: { id: storeId }
+        })
+
+        return { success: true }
+    } catch (error) {
+        console.error("Error deleting store:", error)
+        return { success: false, error: error.message }
+    }
+}

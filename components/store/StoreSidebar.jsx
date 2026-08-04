@@ -17,11 +17,11 @@ const StoreSidebar = ({storeInfo}) => {
     return (
         <div className="inline-flex h-full flex-col gap-6 border-r border-[#EAE5DB] bg-white sm:min-w-64">
             <div className="flex flex-col gap-4 justify-center items-center pt-10 pb-4 max-sm:hidden border-b border-[#F0EBE1] mx-6">
-                <div className="w-16 h-16 rounded-2xl shadow-sm border border-[#EAE5DB] bg-[#FDFBF7] flex items-center justify-center overflow-hidden relative">
-                    {storeInfo?.logo ? (
-                        <Image className="object-cover" src={storeInfo.logo} alt="" fill />
+                <div className="w-20 h-20 flex items-center justify-center relative">
+                    {(storeInfo?.logo && typeof storeInfo.logo === 'string') ? (
+                        <Image className="object-contain" src={storeInfo.logo} alt="" fill />
                     ) : (
-                        <StoreIcon className="w-8 h-8 text-[#8b795a]" />
+                        <Image className="object-contain mix-blend-multiply" src="/shop_icon.png" alt="Store Icon" fill />
                     )}
                 </div>
                 <div className="text-center">

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import { DeleteIcon } from "lucide-react"
-import { couponDummyData } from "@/assets/assets"
+import { getAllCoupons, createCoupon, deleteCoupon as deleteCouponAction } from "@/actions/coupon"
 
 export default function AdminCoupons() {
 
@@ -20,14 +20,29 @@ export default function AdminCoupons() {
     })
 
     const fetchCoupons = async () => {
-        setCoupons(couponDummyData)
+        const data = await getAllCoupons()
+        setCoupons(data)
     }
 
     const handleAddCoupon = async (e) => {
         e.preventDefault()
-        // Logic to add a coupon
-
-
+        const res = await createCoupon(newCoupon)
+        if (res.success) {
+            toast.success("Coupon created!")
+            setNewCoupon({
+                code: '',
+                description: '',
+                discount: '',
+                forNewUser: false,
+                forMember: false,
+                isPublic: false,
+                expiresAt: new Date()
+            })
+            fetchCoupons()
+        } else {
+            toast.error(res.error)
+            throw new Error(res.error)
+        }
     }
 
     const handleChange = (e) => {
@@ -35,9 +50,14 @@ export default function AdminCoupons() {
     }
 
     const deleteCoupon = async (code) => {
-        // Logic to delete a coupon
-
-
+        const res = await deleteCouponAction(code)
+        if (res.success) {
+            toast.success("Coupon deleted")
+            fetchCoupons()
+        } else {
+            toast.error(res.error)
+            throw new Error(res.error)
+        }
     }
 
     useEffect(() => {

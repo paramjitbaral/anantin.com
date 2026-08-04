@@ -7,7 +7,7 @@ import toast from "react-hot-toast"
 import Loading from "@/components/Loading"
 import { UploadCloud, Check, Store } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { createStore, getDemoStoreId } from "@/actions/supplier"
+import { createStore, getLoggedInStoreId } from "@/actions/supplier"
 
 export default function CreateStore() {
     const router = useRouter()
@@ -15,13 +15,14 @@ export default function CreateStore() {
     const [status, setStatus] = useState("")
     const [loading, setLoading] = useState(true)
     const [message, setMessage] = useState("")
+    const [countdown, setCountdown] = useState(5)
 
     const [storeInfo, setStoreInfo] = useState({
         name: "",
         username: "",
         description: "",
         email: "",
-        contact: "",
+        contact: "+91 ",
         gst: "",
         address: "",
         image: null
@@ -33,14 +34,12 @@ export default function CreateStore() {
 
     const fetchSellerStatus = async () => {
         try {
-            const sid = await getDemoStoreId()
+            const sid = await getLoggedInStoreId()
             if (sid) {
                 setAlreadySubmitted(true)
                 setStatus("approved")
                 setMessage("You already have an active store!")
-                setTimeout(() => {
-                    router.push('/store')
-                }, 3000)
+                // Start countdown instead of static timeout
             }
         } catch (error) {
             console.error(error)
@@ -58,7 +57,7 @@ export default function CreateStore() {
             // For now, we mock the logo URL.
             const submitData = {
                 ...storeInfo,
-                logo: storeInfo.image ? "https://via.placeholder.com/150" : "https://via.placeholder.com/150",
+                logo: storeInfo.image ? "/shop icon.png" : "/shop icon.png",
             }
 
             const res = await createStore(submitData)
@@ -68,10 +67,6 @@ export default function CreateStore() {
                 setAlreadySubmitted(true)
                 setMessage("Your application is under review by our curation team.")
                 toast.success("Store application submitted!")
-                
-                setTimeout(() => {
-                    router.push('/store')
-                }, 5000)
             } else {
                 toast.error(res.error || "Failed to submit application")
             }
@@ -85,6 +80,18 @@ export default function CreateStore() {
     useEffect(() => {
         fetchSellerStatus()
     }, [router])
+
+    // Live countdown logic
+    useEffect(() => {
+        if (alreadySubmitted && status === "approved") {
+            if (countdown > 0) {
+                const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
+                return () => clearTimeout(timer)
+            } else {
+                router.push('/store')
+            }
+        }
+    }, [alreadySubmitted, status, countdown, router])
 
     return !loading ? (
         <div className="relative min-h-[calc(100vh-80px)] w-full flex items-center justify-center p-8 lg:p-12 bg-[#F4EFE6] overflow-hidden">
@@ -115,7 +122,7 @@ export default function CreateStore() {
                                 
                                 {/* Top Logo Badge */}
                                 <div className="absolute -top-[50px] left-1/2 -translate-x-1/2 z-30 w-[110px] h-[110px] drop-shadow-[0_5px_10px_rgba(0,0,0,0.4)]">
-                                    <Image src="/shop%20icon.png" alt="Shop Icon" fill className="object-contain mix-blend-multiply" />
+                                    <Image src="/shop icon.png" alt="Shop Icon" fill className="object-contain mix-blend-multiply" />
                                 </div>
 
                                 {/* Header */}
@@ -240,7 +247,7 @@ export default function CreateStore() {
                             </p>
                             {status === "approved" && (
                                 <p className="text-[10px] uppercase font-serif font-bold tracking-widest text-[#D4B26F] bg-[#1E1914] px-4 py-2 rounded-sm shadow-lg">
-                                    Redirecting in 5s...
+                                    Redirecting in {countdown}s...
                                 </p>
                             )}
                         </div>

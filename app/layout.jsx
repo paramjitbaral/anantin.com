@@ -2,6 +2,8 @@ import { Outfit } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import StoreProvider from "@/app/StoreProvider";
 import "./globals.css";
+import StoreInitializer from "@/components/StoreInitializer";
+import { getAllProducts } from "@/actions/product";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
@@ -10,12 +12,15 @@ export const metadata = {
     description: "Anantin. - Shop smarter",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+    const products = await getAllProducts();
+
     return (
         <html lang="en">
             <body className={`${outfit.className} antialiased`}>
                 <StoreProvider>
-                    <Toaster />
+                    <StoreInitializer products={products} />
+                    <Toaster toastOptions={{ style: { whiteSpace: 'nowrap' } }} />
                     {children}
                 </StoreProvider>
             </body>

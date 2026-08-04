@@ -1,5 +1,6 @@
 'use client'
 import ProductDescription from "@/components/ProductDescription";
+import Link from 'next/link';
 import ProductDetails from "@/components/ProductDetails";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,8 +29,12 @@ export default function Product() {
             <div className="max-w-7xl mx-auto">
 
                 {/* Breadcrumbs */}
-                <div className="text-[#8C8A85] text-sm mt-8 mb-5 font-medium">
-                    Home / Products / {product?.category}
+                <div className="text-[#8C8A85] text-sm mt-8 mb-5 font-medium flex items-center gap-1.5">
+                    <Link href="/" className="hover:text-[#2C241B] transition-colors">Home</Link>
+                    <span>/</span>
+                    <Link href="/shop" className="hover:text-[#2C241B] transition-colors">Products</Link>
+                    <span>/</span>
+                    <span className="text-[#2C241B]">{product?.category}</span>
                 </div>
 
                 {/* Product Details */}

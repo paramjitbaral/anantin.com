@@ -1,4 +1,5 @@
 import StoreLayout from "@/components/store/StoreLayout";
+import FloatingAssistant from "@/components/FloatingAssistant";
 
 export const metadata = {
     title: "Anantin. - Store Dashboard",
@@ -12,6 +13,7 @@ export default function RootAdminLayout({ children }) {
             <StoreLayout>
                 {children}
             </StoreLayout>
+            <FloatingAssistant role="supplier" />
         </>
     );
 }

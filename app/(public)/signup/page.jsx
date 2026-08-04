@@ -3,21 +3,64 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
+import { useRouter } from 'next/navigation'
 
 export default function Signup() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         setIsLoading(true)
-        // Simulate signup
-        setTimeout(() => {
+        
+        try {
+            // 1. Sign up with Supabase Auth (handles encryption and email verification)
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        name,
+                        role: 'CUSTOMER'
+                    }
+                }
+            })
+
+            if (authError) throw authError
+
+            // 2. Also create a record in our custom users table so we can link stores/orders to them
+            if (authData?.user) {
+                const { error: dbError } = await supabase
+                    .from('users')
+                    .insert([{ 
+                        id: authData.user.id, // Use the secure auth ID
+                        name, 
+                        email, 
+                        password: 'ENCRYPTED_BY_SUPABASE_AUTH', // We no longer store the real password
+                        role: 'CUSTOMER' 
+                    }])
+                
+                if (dbError) {
+                    console.error("Error creating user profile:", dbError)
+                }
+            }
+
+            toast.success('Success! Please check your email to verify your account.')
+            // Don't log them in yet, they need to verify their email
+            setTimeout(() => {
+                router.push('/login')
+            }, 2000)
+        } catch (error) {
+            toast.error(error.message || 'Failed to create account')
+        } finally {
             setIsLoading(false)
-            toast.success('Welcome to Anantin!')
-        }, 1500)
+        }
     }
 
     return (
@@ -147,13 +190,20 @@ export default function Signup() {
                                         {/* Password Input */}
                                         <div className="relative w-full">
                                             <input
-                                                type="password"
+                                                type={showPassword ? 'text' : 'password'}
                                                 required
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                className="w-full bg-[#EAE5DB] border-2 border-[#bda27e] rounded-md py-2.5 px-4 text-[13px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none focus:border-[#8b6b3d] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.2),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]"
+                                                className="w-full bg-[#EAE5DB] border-2 border-[#bda27e] rounded-md py-2.5 px-4 pr-10 text-[13px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none focus:border-[#8b6b3d] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.2),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]"
                                                 placeholder="Password"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b795a] hover:text-[#2C241B] focus:outline-none"
+                                            >
+                                                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                                            </button>
                                         </div>
 
                                         {/* Submit Button */}

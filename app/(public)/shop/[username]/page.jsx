@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { MailIcon, MapPinIcon, Store } from "lucide-react"
 import Loading from "@/components/Loading"
 import Image from "next/image"
-import { dummyStoreData, productDummyData } from "@/assets/assets"
+import { getStoreByUsername } from "@/actions/supplier"
 
 export default function StoreShop() {
 
@@ -15,99 +15,96 @@ export default function StoreShop() {
     const [loading, setLoading] = useState(true)
 
     const fetchStoreData = async () => {
-        setStoreInfo(dummyStoreData)
-        setProducts(productDummyData)
+        const store = await getStoreByUsername(username)
+        if (store) {
+            setStoreInfo(store)
+            setProducts(store.Product || [])
+        }
         setLoading(false)
     }
 
     useEffect(() => {
         fetchStoreData()
-    }, [])
+    }, [username])
 
     return !loading ? (
-        <div className="min-h-screen bg-[#F4EFE6] pb-24 relative overflow-hidden">
+        <div className="min-h-screen bg-[#FDFBF7] pb-24 relative overflow-hidden font-sans">
             
-            {/* Background Texture */}
-            <div className="absolute inset-0 z-0 opacity-[0.12] pointer-events-none" style={{ backgroundImage: 'url("/newsletter_fabric.png")', backgroundSize: '400px', backgroundRepeat: 'repeat' }} />
+            {/* Subtle Background Texture for the whole page */}
+            <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none mix-blend-multiply" style={{ backgroundImage: 'url("/newsletter_fabric.png")', backgroundSize: '400px', backgroundRepeat: 'repeat' }} />
 
-            {/* Store Info Banner */}
+            {/* Hero Header Section - Horizontal Royal Fabric */}
             {storeInfo && (
-                <div className="relative z-10 w-full max-w-7xl mx-auto mt-12 px-4 sm:px-6">
-                    <div className="relative rounded-sm border-[6px] border-[#1E1914] shadow-2xl p-0.5 bg-[#1E1914] flex flex-col md:flex-row">
-                        {/* Gold Inner Trim */}
-                        <div className="w-full h-full border-[2px] border-[#D4B26F] relative rounded-sm bg-[#F4EFE6] overflow-hidden flex flex-col md:flex-row">
+                <div className="w-full relative bg-[#1E1914] py-8 sm:py-12 flex flex-col justify-center overflow-hidden border-b-[4px] border-[#D4B26F]">
+                    
+                    {/* Rich Fabric Background */}
+                    <Image 
+                        src="/swirling_fabrics.png" 
+                        fill 
+                        className="object-cover opacity-50 mix-blend-screen pointer-events-none scale-105" 
+                        alt="Fabric Background" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#1E1914] via-[#1E1914]/80 to-[#1E1914]/40" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1E1914]/90 to-transparent sm:hidden" />
+
+                    {/* Content (Horizontal Layout) */}
+                    <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-center w-full max-w-6xl mx-auto px-4 sm:px-6 gap-6 sm:gap-10">
+                        
+                        {/* Avatar */}
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-[3px] border-[#D4B26F] shadow-[0_0_30px_rgba(212,178,111,0.25)] bg-[#FDFBF7] relative p-1 group flex-shrink-0">
+                            <Image
+                                src={((storeInfo.logo?.startsWith('http') || storeInfo.logo?.startsWith('/')) ? storeInfo.logo : `/${storeInfo.logo || 'shop icon.png'}`).replace(/ /g, '%20')}
+                                alt={storeInfo.name}
+                                fill
+                                className={`object-contain transition-transform duration-700 group-hover:scale-105 rounded-full ${!storeInfo.logo && "mix-blend-multiply"}`}
+                            />
+                            {/* Inner ring */}
+                            <div className="absolute inset-0 rounded-full border border-[#D4B26F]/40 pointer-events-none" />
+                        </div>
+
+                        {/* Store Info */}
+                        <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 mb-2 sm:mb-3">
+                                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-semibold text-[#FDFBF7] tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+                                    {storeInfo.name}
+                                </h1>
+                                <p className="text-[10px] sm:text-xs font-semibold text-[#D4B26F] uppercase tracking-[0.25em] drop-shadow-md pb-1.5">
+                                    @{username}
+                                </p>
+                            </div>
                             
-                            {/* Left Side: Store Visual Banner (Fabric) */}
-                            <div className="relative w-full md:w-1/3 h-48 md:h-auto border-b md:border-b-0 md:border-r-2 border-dashed border-[#b8b0a1] bg-[#1E1914] flex items-center justify-center p-6 overflow-hidden">
-                                <Image
-                                    src="/swirling_fabrics.png"
-                                    alt="Banner Background"
-                                    fill
-                                    className="object-cover opacity-60 scale-125 mix-blend-multiply pointer-events-none"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#1E1914]/80 to-transparent" />
-                                
-                                {/* Logo Badge */}
-                                <div className="relative z-20 w-[120px] h-[120px] rounded-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
-                                    <Image
-                                        src={storeInfo.logo || "/shop icon.png"}
-                                        alt={storeInfo.name}
-                                        fill
-                                        className={`object-contain ${!storeInfo.logo && "mix-blend-multiply"}`}
-                                    />
+                            <p className="text-sm sm:text-base text-[#D3C9BD] max-w-3xl leading-relaxed mb-5 font-serif italic drop-shadow-md line-clamp-3 sm:line-clamp-none">
+                                "{storeInfo.description}"
+                            </p>
+
+                            {/* Badges */}
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                                <div className="flex items-center gap-2 border border-[#D4B26F]/40 bg-[#1E1914]/40 backdrop-blur-md px-4 py-1.5 sm:px-5 sm:py-2 rounded-full shadow-lg text-[#FDFBF7] hover:bg-[#D4B26F]/10 transition-colors">
+                                    <MapPinIcon className="w-3.5 h-3.5 text-[#D4B26F]" />
+                                    <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-widest">{storeInfo.address}</span>
+                                </div>
+                                <div className="flex items-center gap-2 border border-[#D4B26F]/40 bg-[#1E1914]/40 backdrop-blur-md px-4 py-1.5 sm:px-5 sm:py-2 rounded-full shadow-lg text-[#FDFBF7] hover:bg-[#D4B26F]/10 transition-colors">
+                                    <MailIcon className="w-3.5 h-3.5 text-[#D4B26F]" />
+                                    <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-widest">{storeInfo.email}</span>
                                 </div>
                             </div>
-
-                            {/* Right Side: Store Details (Canvas) */}
-                            <div className="relative w-full md:w-2/3 h-full p-8 md:p-12 flex flex-col justify-center">
-                                {/* Subtle Background Texture */}
-                                <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply">
-                                    <Image src="/newsletter_fabric.png" alt="Texture" fill className="object-cover" />
-                                </div>
-
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h1 className="text-4xl md:text-5xl font-serif font-semibold text-[#8b6b3d]" style={{ textShadow: '1px 1px 0px #fff, -1px -1px 0px #c5a059' }}>
-                                            {storeInfo.name}
-                                        </h1>
-                                    </div>
-                                    <p className="text-[10px] font-serif font-bold text-[#2C241B] uppercase tracking-[0.2em] mb-6">
-                                        @{username}
-                                    </p>
-                                    
-                                    <p className="text-[14px] font-serif text-[#4A3F35] max-w-2xl leading-relaxed mb-8">
-                                        {storeInfo.description}
-                                    </p>
-                                    
-                                    <div className="flex flex-col sm:flex-row gap-6">
-                                        <div className="flex items-center gap-2 bg-[#EAE5DB] border-[1.5px] border-[#bda27e] px-4 py-2 rounded shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.7)]">
-                                            <MapPinIcon className="w-4 h-4 text-[#8b6b3d]" />
-                                            <span className="text-[11px] font-serif font-semibold text-[#2C241B] uppercase tracking-wider">{storeInfo.address}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 bg-[#EAE5DB] border-[1.5px] border-[#bda27e] px-4 py-2 rounded shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1),inset_-1px_-1px_2px_rgba(255,255,255,0.7)]">
-                                            <MailIcon className="w-4 h-4 text-[#8b6b3d]" />
-                                            <span className="text-[11px] font-serif font-semibold text-[#2C241B] uppercase tracking-wider">{storeInfo.email}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
                 </div>
             )}
 
             {/* Products Section */}
-            <div className="relative z-10 max-w-7xl mx-auto mt-16 px-4 sm:px-6">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-serif font-semibold text-[#8b6b3d] flex items-center gap-3">
-                        <Store className="text-[#1E1914]" size={24} />
+            <div className="relative z-10 max-w-6xl mx-auto mt-16 sm:mt-20 px-4 sm:px-6">
+                <div className="flex items-center justify-center mb-12">
+                    <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-[#8b6b3d]/40" />
+                    <h2 className="text-2xl md:text-3xl font-serif font-medium text-[#2C241B] flex items-center gap-3 px-6 tracking-wide">
+                        <Store className="text-[#D4B26F]" size={28} />
                         The Collection
                     </h2>
-                    <div className="h-[2px] flex-grow mx-6 bg-gradient-to-r from-[#D4B26F]/50 to-transparent"></div>
+                    <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-[#8b6b3d]/40" />
                 </div>
                 
-                <div className="grid grid-cols-2 sm:flex flex-wrap gap-6 xl:gap-8 justify-center sm:justify-start">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 xl:gap-8 justify-items-center">
                     {products.map((product) => <ProductCard key={product.id} product={product} />)}
                 </div>
             </div>

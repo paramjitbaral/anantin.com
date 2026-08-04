@@ -1,5 +1,5 @@
 'use client'
-import { getAllStores, toggleStoreActiveStatus } from "@/actions/admin"
+import { getAllStores, toggleStoreActiveStatus, deleteStoreById } from "@/actions/admin"
 import StoreInfo from "@/components/admin/StoreInfo"
 import Loading from "@/components/Loading"
 import { useEffect, useState } from "react"
@@ -29,6 +29,19 @@ export default function AdminStores() {
             toast.success("Store status updated")
         } else {
             toast.error("Failed to update status")
+        }
+    }
+
+    const handleDeleteStore = async (storeId) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this store? This action cannot be undone.")
+        if (!confirmDelete) return
+
+        const res = await deleteStoreById(storeId)
+        if (res.success) {
+            setStores(prev => prev.filter(s => s.id !== storeId))
+            toast.success("Store deleted successfully")
+        } else {
+            toast.error(res.error || "Failed to delete store")
         }
     }
 
@@ -88,7 +101,7 @@ export default function AdminStores() {
                             <div key={store.id} className="relative group bg-white rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#F0EBE1] overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-500 flex flex-col">
                                 
                                 {/* Store Info handles the entire internal card layout now */}
-                                <StoreInfo store={store} toggleIsActive={toggleIsActive} />
+                                <StoreInfo store={store} toggleIsActive={toggleIsActive} onDelete={() => handleDeleteStore(store.id)} />
 
                             </div>
                         ))}

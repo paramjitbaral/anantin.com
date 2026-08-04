@@ -4,6 +4,9 @@ import AddressModal from './AddressModal';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
+import { placeOrder } from '@/actions/order';
+import { validateCoupon } from '@/actions/coupon';
 
 const OrderSummary = ({ totalPrice, items }) => {
 
@@ -11,26 +14,44 @@ const OrderSummary = ({ totalPrice, items }) => {
 
     const router = useRouter();
 
-    const addressList = useSelector(state => state.address.list);
-
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [couponCodeInput, setCouponCodeInput] = useState('');
     const [coupon, setCoupon] = useState('');
+    const [addressList, setAddressList] = useState([]);
 
-    const handleCouponCode = async (event) => {
-        event.preventDefault();
-        if (couponCodeInput.trim().toUpperCase() === 'NEW20') {
-            setCoupon({ code: 'NEW20', discount: 20 });
-            toast.success('Promo code applied successfully!');
-            setCouponCodeInput('');
-        } else {
-            toast.error('Invalid promo code');
+    const fetchAddresses = async () => {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            const { getUserAddresses } = await import('@/actions/user');
+            const data = await getUserAddresses(user.id);
+            setAddressList(data);
         }
     }
 
-    const handlePlaceOrder = (e) => {
+    React.useEffect(() => {
+        fetchAddresses();
+    }, []);
+
+    const handleCouponCode = async (event) => {
+        event.preventDefault();
+        
+        const res = await validateCoupon(couponCodeInput);
+
+        if (res.success) {
+            setCoupon(res.coupon);
+            toast.success('Promo code applied successfully!');
+            setCouponCodeInput('');
+        } else {
+            toast.error(res.error);
+        }
+    }
+
+    const dispatch = useDispatch();
+
+    const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
         if (!selectedAddress) {
@@ -38,14 +59,35 @@ const OrderSummary = ({ totalPrice, items }) => {
             return;
         }
 
-        const promise = new Promise(resolve => setTimeout(resolve, 1500)).then(() => {
-            router.push('/orders');
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
+
+        const orderData = {
+            items: items,
+            address: selectedAddress,
+            paymentMethod: paymentMethod,
+            coupon: coupon,
+            total: totalPrice,
+            userId: user ? user.id : null
+        };
+
+        const promise = placeOrder(orderData).then(res => {
+            if (res.success) {
+                // Clear cart by deleting each item or dispatching a clear action
+                items.forEach(item => {
+                    dispatch({ type: 'cart/deleteItemFromCart', payload: { productId: item.id } });
+                });
+                router.push('/orders');
+                return res;
+            } else {
+                throw new Error(res.error);
+            }
         });
 
         toast.promise(promise, {
             loading: 'Processing your bespoke order...',
             success: 'Order placed successfully!',
-            error: 'Failed to process order'
+            error: (err) => err.message || 'Failed to process order'
         });
     }
 
@@ -162,7 +204,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                 Finalize Order
             </button>
 
-            {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} />}
+            {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} onAddressAdded={fetchAddresses} />}
         </div>
     )
 }

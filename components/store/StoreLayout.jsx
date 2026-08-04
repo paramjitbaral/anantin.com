@@ -1,25 +1,40 @@
 'use client'
-import { useEffect, useState } from "react"
-import Loading from "../Loading"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import SellerNavbar from "./StoreNavbar"
+import { useEffect, useState } from "react"
+import Loading from "../Loading"
 import SellerSidebar from "./StoreSidebar"
-import { getDemoStoreId } from "@/actions/supplier"
+import { getLoggedInStoreId, supplierLogin, getStoreById } from "@/actions/supplier"
+import { supabase } from "@/lib/supabaseClient"
 import prisma from "@/lib/prisma"
 import toast from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 const StoreLayout = ({ children }) => {
+    const router = useRouter()
     const [isSeller, setIsSeller] = useState(false)
     const [loading, setLoading] = useState(true)
     const [storeInfo, setStoreInfo] = useState(null)
+    
+    // Login form state
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [isLoggingIn, setIsLoggingIn] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
 
     const fetchIsSeller = async () => {
         try {
-            const sid = await getDemoStoreId()
+            const sid = await getLoggedInStoreId()
             if (sid) {
                 setIsSeller(true)
-                setStoreInfo({ name: "Premium Vendor", logo: "" })
+                const store = await getStoreById(sid)
+                if (store) {
+                    setStoreInfo(store)
+                } else {
+                    setStoreInfo({ name: "Your Store", logo: "/shop icon.png" })
+                }
             }
         } catch (error) {
             console.error(error)
@@ -32,10 +47,46 @@ const StoreLayout = ({ children }) => {
         fetchIsSeller()
     }, [])
 
-    const handleDemoLogin = () => {
-        toast.success("Logged in as Demo Vendor!")
-        setIsSeller(true)
-        setStoreInfo({ name: "Demo Store", logo: "" })
+    const handleLogin = async (e) => {
+        e.preventDefault()
+        setIsLoggingIn(true)
+        
+        // Admin Universal Bypass
+        if (username === 'paramjitbaral44@gmail.com') {
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: username,
+                    password: password
+                })
+                
+                if (data?.user) {
+                    toast.success("Welcome back, Admin!")
+                    router.push('/admin')
+                    return
+                } else {
+                    toast.error("Invalid Admin Credentials")
+                    setIsLoggingIn(false)
+                    return
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        try {
+            const res = await supplierLogin(username, password)
+            if (res.success) {
+                toast.success("Welcome back!")
+                setIsSeller(true)
+                setStoreInfo(res.store)
+            } else {
+                toast.error(res.error || "Login failed")
+            }
+        } catch (error) {
+            toast.error("An error occurred during login")
+        } finally {
+            setIsLoggingIn(false)
+        }
     }
 
     return loading ? (
@@ -43,10 +94,13 @@ const StoreLayout = ({ children }) => {
     ) : isSeller ? (
         <div className="flex flex-col h-screen bg-[#FDFBF7]">
             <SellerNavbar />
-            <div className="flex flex-1 items-start h-full overflow-y-scroll no-scrollbar">
+            <div className="flex flex-1 items-start h-full overflow-hidden">
                 <SellerSidebar storeInfo={storeInfo} />
-                <div className="flex-1 h-full p-4 lg:p-6 overflow-y-auto no-scrollbar">
-                    {children}
+                <div className="relative flex-1 h-full overflow-y-auto no-scrollbar bg-[#FDFBF7]">
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url('/denim_plaid_texture.png')", backgroundRepeat: "repeat", backgroundSize: "600px" }}></div>
+                    <div className="relative z-10 p-6 lg:p-8 min-h-full flex flex-col">
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,7 +166,7 @@ const StoreLayout = ({ children }) => {
                                 {/* Top Icon Badge */}
                                 <div className="absolute -top-[45px] left-1/2 -translate-x-1/2 z-30 w-[90px] h-[90px] rounded-full shadow-[0_5px_15px_rgba(0,0,0,0.5)] flex items-center justify-center bg-transparent">
                                     <div className="relative w-full h-full border-[3px] border-[#1E1914] rounded-full overflow-hidden flex items-center justify-center bg-[#FDFBF7]">
-                                        <Image src="/shop%20icon.png" alt="Icon" fill className="object-cover scale-[1.15] mix-blend-multiply" />
+                                        <Image src="/shop icon.png" alt="Icon" fill className="object-cover scale-[1.15] mix-blend-multiply" />
                                     </div>
                                 </div>
                                 
@@ -128,9 +182,19 @@ const StoreLayout = ({ children }) => {
                                         </p>
                                     </div>
                                     
-                                    <div className="w-full space-y-4">
-                                        <input type="email" placeholder="Email or Phone" disabled className="w-full bg-[#EAE5DB] border-[2px] border-[#D4C3A3] rounded-md py-3 px-4 text-[13.5px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none cursor-not-allowed shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.7)]" value="demo@vendor.com" />
-                                        <input type="password" placeholder="Password" disabled className="w-full bg-[#EAE5DB] border-[2px] border-[#D4C3A3] rounded-md py-3 px-4 text-[13.5px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none cursor-not-allowed shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.7)]" value="••••••••" />
+                                    <form onSubmit={handleLogin} className="w-full space-y-4">
+                                        <input type="text" placeholder="Username" required value={username} onChange={(e) => setUsername(e.target.value)} className="w-full bg-[#EAE5DB] border-[2px] border-[#D4C3A3] rounded-md py-3 px-4 text-[13.5px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.7)]" />
+                                        
+                                        <div className="relative w-full">
+                                            <input type={showPassword ? "text" : "password"} placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#EAE5DB] border-[2px] border-[#D4C3A3] rounded-md py-3 px-4 pr-10 text-[13.5px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none shadow-[inset_2px_2px_5px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.7)]" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b795a] hover:text-[#2C241B] focus:outline-none"
+                                            >
+                                                {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                                            </button>
+                                        </div>
                                         
                                         <div className="flex justify-between items-center text-[12.5px] font-serif text-[#2C241B] pt-1 mb-2">
                                             <label className="flex items-center gap-2 cursor-pointer font-medium group">
@@ -142,18 +206,18 @@ const StoreLayout = ({ children }) => {
                                             <Link href="#" className="text-[#8b6b3d] hover:underline font-bold">Forgot Password?</Link>
                                         </div>
                                         
-                                        <button onClick={handleDemoLogin} className="w-full mx-auto block relative p-[3px] bg-[#1E1914] rounded-full shadow-[0_5px_12px_rgba(0,0,0,0.4)] overflow-hidden active:scale-95 transition-transform group">
+                                        <button type="submit" disabled={isLoggingIn} className="w-full mx-auto block relative p-[3px] bg-[#1E1914] rounded-full shadow-[0_5px_12px_rgba(0,0,0,0.4)] overflow-hidden active:scale-95 transition-transform group">
                                             <div className="w-full h-full border-[1.5px] border-dashed border-[#FDFBF7]/60 rounded-full py-3 flex items-center justify-center relative overflow-hidden transition-colors">
                                                 <div className="absolute inset-0 z-0">
                                                     <Image src="/plaid_texture.png" alt="Plaid Texture" fill className="object-cover opacity-90 z-0 scale-125 mix-blend-multiply" />
                                                     <div className="absolute inset-0 bg-black/20 mix-blend-multiply z-10"></div>
                                                 </div>
                                                 <span className="relative z-10 text-[14.5px] font-serif font-bold text-[#FDFBF7] tracking-widest uppercase drop-shadow-md">
-                                                    Log In
+                                                    {isLoggingIn ? "Logging in..." : "Log In"}
                                                 </span>
                                             </div>
                                         </button>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                             

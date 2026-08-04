@@ -2,20 +2,97 @@
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
 
 /**
- * Temporary helper to get the "logged in" store ID.
- * In a real app with Clerk/NextAuth, you would extract this from the session.
+ * Get the currently logged in store ID from secure cookies.
  */
-export async function getDemoStoreId() {
+export async function getLoggedInStoreId() {
     try {
-        if (!process.env.DATABASE_URL) return null;
-        const store = await prisma.store.findFirst()
-        return store ? store.id : null
+        const cookieStore = await cookies()
+        const storeId = cookieStore.get('storeId')?.value
+        return storeId || null
     } catch (error) {
-        console.error("Error fetching demo store:", error)
+        console.error("Error fetching logged in store:", error)
         return null
     }
+}
+
+/**
+ * Get store details by ID
+ */
+export async function getStoreById(storeId) {
+    if (!storeId || !process.env.DATABASE_URL) return null
+    try {
+        return await prisma.store.findUnique({ where: { id: storeId } })
+    } catch (error) {
+        return null
+    }
+}
+
+/**
+ * Get store details by Username
+ */
+export async function getStoreByUsername(username) {
+    if (!username || !process.env.DATABASE_URL) return null
+    try {
+        return await prisma.store.findUnique({ 
+            where: { username },
+            include: { 
+                Product: {
+                    include: {
+                        rating: true
+                    }
+                } 
+            }
+        })
+    } catch (error) {
+        return null
+    }
+}
+
+/**
+ * Login a supplier using their username and contact number (password).
+ */
+export async function supplierLogin(username, contact) {
+    try {
+        if (!process.env.DATABASE_URL) return { success: false, error: "Database not configured" }
+
+        const store = await prisma.store.findUnique({ where: { username } })
+        
+        if (!store) {
+            return { success: false, error: 'Store not found' }
+        }
+        
+        // Strip non-numeric characters and compare the last 10 digits
+        const cleanStored = store.contact.replace(/\D/g, '')
+        const cleanProvided = contact.replace(/\D/g, '')
+        
+        if (cleanStored.slice(-10) !== cleanProvided.slice(-10)) {
+            return { success: false, error: 'Invalid credentials' }
+        }
+        
+        if (store.status !== 'approved') {
+            return { success: false, error: 'Store is pending admin approval.' }
+        }
+
+        // Set a secure HTTP-only cookie
+        const cookieStore = await cookies()
+        cookieStore.set('storeId', store.id, { httpOnly: true, secure: true, path: '/' })
+        return { success: true, store }
+    } catch (error) {
+        console.error("Error logging in store:", error)
+        return { success: false, error: "Failed to log in" }
+    }
+}
+
+/**
+ * Log out a supplier by clearing the secure cookie.
+ */
+export async function supplierLogout() {
+    const cookieStore = await cookies()
+    cookieStore.delete('storeId')
+    return { success: true }
 }
 
 /**
@@ -25,27 +102,15 @@ export async function createStore(storeData) {
     try {
         if (!process.env.DATABASE_URL) return { success: false, error: "Database not configured" }
 
-        // Find or create a dummy user to associate with this store
-        let user = await prisma.user.findFirst()
-        if (!user) {
-            user = await prisma.user.create({
-                data: {
-                    id: "dummy-user-" + Date.now(),
-                    name: "Dummy User",
-                    email: storeData.email || "dummy@example.com",
-                    image: "https://via.placeholder.com/150",
-                }
-            })
-        }
-
-        // Check if store already exists for this user
-        const existingStore = await prisma.store.findUnique({
-            where: { userId: user.id }
+        // Create a new dummy user to satisfy the foreign key constraint
+        const user = await prisma.user.create({
+            data: {
+                id: "store-owner-" + Date.now() + Math.floor(Math.random() * 1000),
+                name: storeData.name || "Store Owner",
+                email: storeData.email || "dummy@example.com",
+                image: "/shop icon.png",
+            }
         })
-
-        if (existingStore) {
-            return { success: false, error: "You already have a store account." }
-        }
 
         const newStore = await prisma.store.create({
             data: {
@@ -54,7 +119,7 @@ export async function createStore(storeData) {
                 username: storeData.username,
                 description: storeData.description,
                 address: storeData.address,
-                logo: storeData.logo || "https://via.placeholder.com/150",
+                logo: storeData.logo || "/shop icon.png",
                 email: storeData.email,
                 contact: storeData.contact,
                 status: "pending",
@@ -68,28 +133,149 @@ export async function createStore(storeData) {
 
     } catch (error) {
         console.error("Error creating store:", error)
-        return { success: false, error: "Failed to create store. Username might be taken." }
+        return { success: false, error: error.message || "Failed to create store. Username might be taken." }
     }
 }
 
 /**
  * Fetches overall metrics for the Supplier Dashboard.
  */
-export async function getStoreDashboardData(storeId) {
+export async function getStoreDashboardData(storeId, view = 'monthly') {
     if (!storeId || !process.env.DATABASE_URL) return null
 
     try {
+        const currentDate = new Date();
+        let startDate = new Date();
+        
+        if (view === 'daily') {
+            startDate.setHours(currentDate.getHours() - 24);
+        } else if (view === 'yearly') {
+            startDate.setFullYear(currentDate.getFullYear() - 1);
+        } else {
+            // default to monthly
+            startDate.setDate(currentDate.getDate() - 30);
+        }
+
         const products = await prisma.product.count({ where: { storeId } })
         
         const orders = await prisma.order.findMany({
-            where: { storeId },
-            include: { orderItems: true }
+            where: { 
+                storeId,
+                createdAt: { gte: startDate }
+            },
+            include: { 
+                orderItems: {
+                    include: { product: true }
+                },
+                user: true 
+            },
+            orderBy: { createdAt: 'desc' }
         })
 
         const totalOrders = orders.length
-        const totalEarnings = orders
-            .filter(o => o.isPaid || o.status === 'DELIVERED')
-            .reduce((sum, order) => sum + order.total, 0)
+        
+        // Revenue calculations
+        const validOrders = orders.filter(o => o.isPaid || o.status === 'DELIVERED')
+        const totalEarnings = validOrders.reduce((sum, order) => sum + order.total, 0)
+        
+        // Calculate total unique customers
+        const uniqueCustomerIds = new Set(orders.map(o => o.userId).filter(Boolean))
+        const totalCustomers = uniqueCustomerIds.size
+
+        // Calculate Sales Data for Chart based on view
+        const salesData = [];
+        
+        if (view === 'daily') {
+            // Last 24 hours grouped into 6 blocks of 4 hours
+            for (let i = 5; i >= 0; i--) {
+                const start = new Date(currentDate);
+                start.setHours(start.getHours() - (i * 4) - 4);
+                const end = new Date(currentDate);
+                end.setHours(end.getHours() - (i * 4));
+                salesData.push({
+                    name: `${start.getHours()}:00`,
+                    revenue: 0,
+                    orders: 0,
+                    start,
+                    end
+                });
+            }
+            validOrders.forEach(order => {
+                const orderDate = new Date(order.createdAt);
+                const block = salesData.find(d => orderDate >= d.start && orderDate <= d.end);
+                if (block) {
+                    block.revenue += order.total;
+                    block.orders += 1;
+                }
+            });
+        } else if (view === 'yearly') {
+            // Last 12 months
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                salesData.push({
+                    name: monthNames[d.getMonth()],
+                    revenue: 0,
+                    orders: 0,
+                    month: d.getMonth(),
+                    year: d.getFullYear()
+                });
+            }
+            validOrders.forEach(order => {
+                const orderDate = new Date(order.createdAt);
+                const block = salesData.find(d => d.month === orderDate.getMonth() && d.year === orderDate.getFullYear());
+                if (block) {
+                    block.revenue += order.total;
+                    block.orders += 1;
+                }
+            });
+        } else {
+            // Monthly view (last 30 days) - group by week or just 4 blocks
+            for (let i = 4; i >= 1; i--) {
+                const end = new Date(currentDate);
+                end.setDate(end.getDate() - ((i - 1) * 7));
+                const start = new Date(end);
+                start.setDate(start.getDate() - 7);
+                salesData.push({
+                    name: `Week ${5 - i}`,
+                    revenue: 0,
+                    orders: 0,
+                    start,
+                    end
+                });
+            }
+            validOrders.forEach(order => {
+                const orderDate = new Date(order.createdAt);
+                const block = salesData.find(d => orderDate >= d.start && orderDate <= d.end);
+                if (block) {
+                    block.revenue += order.total;
+                    block.orders += 1;
+                }
+            });
+        }
+
+        // Top Products Calculation
+        const productSales = {};
+        validOrders.forEach(order => {
+            order.orderItems.forEach(item => {
+                if (!productSales[item.productId]) {
+                    productSales[item.productId] = {
+                        product: item.product,
+                        totalSold: 0,
+                        revenue: 0
+                    }
+                }
+                productSales[item.productId].totalSold += item.quantity;
+                productSales[item.productId].revenue += (item.price * item.quantity);
+            })
+        });
+        
+        const topProducts = Object.values(productSales)
+            .sort((a, b) => b.revenue - a.revenue)
+            .slice(0, 5);
+
+        // Recent Transactions (Top 5)
+        const recentTransactions = orders.slice(0, 5);
 
         // Fetch recent ratings for this store's products
         const recentRatings = await prisma.rating.findMany({
@@ -101,9 +287,13 @@ export async function getStoreDashboardData(storeId) {
 
         return {
             totalProducts: products,
-            totalEarnings: totalEarnings,
-            totalOrders: totalOrders,
-            ratings: recentRatings
+            totalEarnings,
+            totalOrders,
+            totalCustomers,
+            ratings: recentRatings,
+            salesData,
+            recentTransactions,
+            topProducts
         }
     } catch (error) {
         console.error("Error fetching supplier dashboard data:", error)
@@ -145,6 +335,25 @@ export async function updateProductStock(productId, newStock) {
     } catch (error) {
         console.error("Error updating stock:", error)
         return { success: false, error: "Failed to update stock" }
+    }
+}
+
+/**
+ * Updates a product's price.
+ */
+export async function updateProductPrice(productId, newPrice) {
+    try {
+        if (!process.env.DATABASE_URL) return { success: false, error: "Database not configured" };
+
+        await prisma.product.update({
+            where: { id: productId },
+            data: { price: parseFloat(newPrice) }
+        })
+        revalidatePath('/store/manage-product')
+        return { success: true }
+    } catch (error) {
+        console.error("Error updating price:", error)
+        return { success: false, error: "Failed to update price" }
     }
 }
 

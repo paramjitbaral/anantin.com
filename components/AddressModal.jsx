@@ -3,7 +3,9 @@ import { XIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
 
-const AddressModal = ({ setShowAddressModal }) => {
+import { addAddress } from "@/actions/user"
+
+const AddressModal = ({ setShowAddressModal, onAddressAdded }) => {
 
     const [address, setAddress] = useState({
         name: '',
@@ -26,7 +28,24 @@ const AddressModal = ({ setShowAddressModal }) => {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        setShowAddressModal(false)
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            toast.error('Please log in to add an address');
+            return;
+        }
+        const user = JSON.parse(userStr);
+
+        const res = await addAddress(user.id, address);
+        
+        if (res.success) {
+            toast.success("Address added successfully!");
+            setShowAddressModal(false);
+            if (onAddressAdded) onAddressAdded();
+            return res;
+        } else {
+            toast.error(res.error);
+            throw new Error(res.error);
+        }
     }
 
     return (

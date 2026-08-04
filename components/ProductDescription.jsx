@@ -30,16 +30,22 @@ const ProductDescription = ({ product }) => {
                 <div className="flex flex-col gap-3 mt-14">
                     {product.rating.map((item,index) => (
                         <div key={index} className="flex gap-5 mb-10">
-                            <Image src={item.user.image} alt="" className="size-10 rounded-full" width={100} height={100} />
+                            {item.user.image && !item.user.image.includes('shop icon') ? (
+                                <Image src={item.user.image} alt="" className="size-10 rounded-full" width={100} height={100} />
+                            ) : (
+                                <div className="size-10 rounded-full bg-[#2C241B] text-[#EAE5DB] flex items-center justify-center font-bold text-lg flex-shrink-0">
+                                    {item.user.name?.charAt(0).toUpperCase()}
+                                </div>
+                            )}
                             <div>
-                                <div className="flex items-center" >
+                                <p className="font-semibold text-[#2C241B] mb-1">{item.user.name}</p>
+                                <div className="flex items-center mb-2" >
                                     {Array(5).fill('').map((_, index) => (
-                                        <StarIcon key={index} size={18} className='text-transparent mt-0.5' fill={item.rating >= index + 1 ? "#00C950" : "#D1D5DB"} />
+                                        <StarIcon key={index} size={16} className='text-transparent' fill={item.rating >= index + 1 ? "#00C950" : "#D1D5DB"} />
                                     ))}
                                 </div>
-                                <p className="text-sm max-w-lg my-4">{item.review}</p>
-                                <p className="font-medium text-[#2C241B]">{item.user.name}</p>
-                                <p className="mt-3 font-light text-xs text-[#8C8A85]">{new Date(item.createdAt).toDateString()}</p>
+                                <p className="text-sm max-w-lg mb-1">{item.review}</p>
+                                <p className="font-light text-xs text-[#8C8A85]">{new Date(item.createdAt).toDateString()}</p>
                             </div>
                         </div>
                     ))}
@@ -48,7 +54,7 @@ const ProductDescription = ({ product }) => {
 
             {/* Store Page */}
             <div className="flex gap-3 mt-14">
-                <Image src={product.store.logo} alt="" className="size-11 rounded-full ring ring-[#EAE0D5]" width={100} height={100} />
+                <Image src={((product.store?.logo?.startsWith('http') || product.store?.logo?.startsWith('/')) ? product.store.logo : `/${product.store?.logo || 'shop icon.png'}`).replace(/ /g, '%20')} alt="" className="size-11 rounded-full ring ring-[#EAE0D5]" width={100} height={100} />
                 <div>
                     <p className="font-medium text-[#2C241B]">Product by {product.store.name}</p>
                     <Link href={`/shop/${product.store.username}`} className="flex items-center gap-1.5 text-[#8C8A85] hover:text-[#2C241B] transition font-semibold"> view store <ArrowRight size={14} /></Link>

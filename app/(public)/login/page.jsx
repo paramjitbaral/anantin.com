@@ -3,20 +3,58 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
+import { useRouter } from 'next/navigation'
 
 export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         setIsLoading(true)
-        // Simulate login
-        setTimeout(() => {
+        
+        try {
+            // Use Supabase Auth to securely log in
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            })
+            
+            if (error) throw error
+
+            if (data.user) {
+                // Bypass for specific admin email
+                if (data.user.email === 'paramjitbaral44@gmail.com') {
+                    toast.success('Welcome back, Admin!')
+                    router.push('/admin')
+                    return
+                }
+
+                // Fetch their custom user profile to get their role, name, etc.
+                const { data: userProfile } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', data.user.id)
+                    .single()
+
+                toast.success('Welcome back to Anantin.')
+                
+                // Combine auth data with profile data for the session
+                const sessionData = { ...data.user, ...userProfile }
+                localStorage.setItem('user', JSON.stringify(sessionData))
+                
+                router.push('/')
+            }
+        } catch (error) {
+            toast.error(error.message || 'Failed to login')
+        } finally {
             setIsLoading(false)
-            toast.success('Welcome back to Anantin.')
-        }, 1500)
+        }
     }
 
     return (
@@ -136,13 +174,20 @@ export default function Login() {
                                         {/* Password Input */}
                                         <div className="relative w-full">
                                             <input
-                                                type="password"
+                                                type={showPassword ? 'text' : 'password'}
                                                 required
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
-                                                className="w-full bg-[#EAE5DB] border-2 border-[#bda27e] rounded-md py-2.5 px-4 text-[13px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none focus:border-[#8b6b3d] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.2),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]"
+                                                className="w-full bg-[#EAE5DB] border-2 border-[#bda27e] rounded-md py-2.5 px-4 pr-10 text-[13px] font-serif text-[#2C241B] placeholder-[#8b795a] outline-none focus:border-[#8b6b3d] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.2),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]"
                                                 placeholder="Password"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b795a] hover:text-[#2C241B] focus:outline-none"
+                                            >
+                                                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
+                                            </button>
                                         </div>
 
                                         {/* Options */}
