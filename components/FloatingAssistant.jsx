@@ -11,11 +11,7 @@ export default function FloatingAssistant({ role = 'customer' }) {
     const pathname = usePathname();
     const chatContainerRef = useRef(null);
     const popupRef = useRef(null);
-
-    // Hide on auth pages
-    if (pathname && (pathname.includes('/login') || pathname.includes('/signup'))) {
-        return null;
-    }
+    const shouldHide = pathname && (pathname.includes('/login') || pathname.includes('/signup'));
 
     // Close on click outside
     useEffect(() => {
@@ -93,6 +89,10 @@ export default function FloatingAssistant({ role = 'customer' }) {
             }
         }
     }, [messages, isLoading, router]);
+
+    if (shouldHide) {
+        return null;
+    }
 
     return (
         <div ref={popupRef} className="fixed bottom-4 sm:bottom-10 right-4 sm:right-12 z-50 font-sans flex flex-col items-end">
