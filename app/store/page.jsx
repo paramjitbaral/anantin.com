@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getLoggedInStoreId, getStoreDashboardData, getStoreById } from "@/actions/supplier"
 import DashboardClient from "@/components/DashboardClient"
 
