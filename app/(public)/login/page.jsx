@@ -49,6 +49,7 @@ export default function Login() {
                 localStorage.setItem('user', JSON.stringify(sessionData))
                 
                 router.push('/')
+                router.refresh() // Clear router cache and force a fresh load of the authenticated page
             }
         } catch (error) {
             toast.error(error.message || 'Failed to login')

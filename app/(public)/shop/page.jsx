@@ -31,6 +31,7 @@ function ShopContent() {
     }, [products, dispatch])
     
     // Filters State
+    const [searchQuery, setSearchQuery] = useState(urlSearch || '')
     const [selectedCategories, setSelectedCategories] = useState(urlCategory && urlCategory !== 'All' ? [urlCategory] : [])
     const [selectedColors, setSelectedColors] = useState(urlColor ? [urlColor] : [])
     const [selectedGsms, setSelectedGsms] = useState(urlGsm ? [urlGsm] : [])
@@ -50,7 +51,7 @@ function ShopContent() {
         if (urlColor) { setSelectedColors([urlColor]); hasFilters = true; }
         if (urlGsm) { setSelectedGsms([urlGsm]); hasFilters = true; }
         if (urlMaxPrice) { setMaxPriceFilter(Number(urlMaxPrice)); hasFilters = true; }
-        if (urlSearch) { hasFilters = true; }
+        if (urlSearch) { setSearchQuery(urlSearch); hasFilters = true; }
 
         // Clean the URL bar so users don't see the messy parameters
         if (hasFilters && typeof window !== 'undefined') {
@@ -94,9 +95,9 @@ function ShopContent() {
         let result = [...products]
 
         // 1. Search Query Filter
-        if (urlSearch) {
+        if (searchQuery) {
             const stopWords = new Set(['cloths', 'clothes', 'cloth', 'fabric', 'fabrics', 'for', 'me', 'find', 'show', 'please', 'open', 'get', 'a', 'the', 'item', 'items']);
-            const words = urlSearch.toLowerCase().split(/\s+/).filter(w => w && !stopWords.has(w));
+            const words = searchQuery.toLowerCase().split(/\s+/).filter(w => w && !stopWords.has(w));
             
             if (words.length > 0) {
                 result = result.filter(p => {
@@ -146,7 +147,7 @@ function ShopContent() {
         }
 
         return result
-    }, [products, urlSearch, selectedCategories, selectedColors, selectedGsms, maxPriceFilter, sortBy])
+    }, [products, searchQuery, selectedCategories, selectedColors, selectedGsms, maxPriceFilter, sortBy])
 
     // Accordion State
     const [openSections, setOpenSections] = useState({
@@ -172,6 +173,7 @@ function ShopContent() {
     }
 
     const clearAllFilters = () => {
+        setSearchQuery('')
         setSelectedCategories([])
         setSelectedColors([])
         setSelectedGsms([])

@@ -62,6 +62,7 @@ const StoreLayout = ({ children }) => {
                 if (data?.user) {
                     toast.success("Welcome back, Admin!")
                     router.push('/admin')
+                    router.refresh()
                     return
                 } else {
                     toast.error("Invalid Admin Credentials")
@@ -79,6 +80,7 @@ const StoreLayout = ({ children }) => {
                 toast.success("Welcome back!")
                 setIsSeller(true)
                 setStoreInfo(res.store)
+                router.refresh() // Force Next.js to reload the layout and fetch authenticated data
             } else {
                 toast.error(res.error || "Login failed")
             }

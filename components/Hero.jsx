@@ -160,10 +160,24 @@ const Hero = () => {
                 {/* Canvas representing the frame animation */}
                 <canvas ref={canvasRef} className="block bg-[#a5a6a0]" />
 
-                {/* Preloading indicator */}
+                {/* Skeleton Loader / Preloading indicator */}
                 {!imagesLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#a5a6a0] text-[#FAF8F5]">
-                        <p className="text-sm font-semibold tracking-widest uppercase animate-pulse">Preloading Luxury Fabrics...</p>
+                    <div className="absolute inset-0 flex flex-col items-start justify-center bg-[#EAE5DB] px-8 sm:px-16 md:px-24 z-50">
+                        <div className="max-w-md w-full animate-pulse flex flex-col gap-4">
+                            {/* Eyebrow skeleton */}
+                            <div className="h-3 w-32 bg-[#D4C3A3] rounded-full mb-2"></div>
+                            {/* Title skeleton */}
+                            <div className="h-12 sm:h-16 w-3/4 bg-[#D4C3A3] rounded-md mb-2"></div>
+                            <div className="h-12 sm:h-16 w-5/6 bg-[#D4C3A3] rounded-md"></div>
+                            {/* Subtitle skeleton */}
+                            <div className="h-4 w-full bg-[#D4C3A3] rounded-full mt-4"></div>
+                            <div className="h-4 w-4/5 bg-[#D4C3A3] rounded-full"></div>
+                        </div>
+                        {/* Scroll indicator skeleton */}
+                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-pulse">
+                            <div className="h-2 w-10 bg-[#D4C3A3] rounded-full"></div>
+                            <div className="w-5 h-8 border-2 border-[#D4C3A3] rounded-full"></div>
+                        </div>
                     </div>
                 )}
 
