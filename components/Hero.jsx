@@ -158,37 +158,18 @@ const Hero = () => {
             {/* Sticky viewport container */}
             <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden bg-[#a5a6a0]">
                 {/* Canvas representing the frame animation */}
-                <canvas ref={canvasRef} className="block bg-[#a5a6a0]" />
+                <canvas ref={canvasRef} className="block bg-[#a5a6a0] w-full h-screen" />
 
-                {/* Skeleton Loader / Preloading indicator */}
+                {/* Background Skeleton Loader / Preloading indicator */}
                 {!imagesLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-start justify-center bg-[#EAE5DB] px-8 sm:px-16 md:px-24 z-50">
-                        <div className="max-w-md w-full animate-pulse flex flex-col gap-4">
-                            {/* Eyebrow skeleton */}
-                            <div className="h-3 w-32 bg-[#D4C3A3] rounded-full mb-2"></div>
-                            {/* Title skeleton */}
-                            <div className="h-12 sm:h-16 w-3/4 bg-[#D4C3A3] rounded-md mb-2"></div>
-                            <div className="h-12 sm:h-16 w-5/6 bg-[#D4C3A3] rounded-md"></div>
-                            {/* Subtitle skeleton */}
-                            <div className="h-4 w-full bg-[#D4C3A3] rounded-full mt-4"></div>
-                            <div className="h-4 w-4/5 bg-[#D4C3A3] rounded-full"></div>
-                        </div>
-                        {/* Scroll indicator skeleton */}
-                        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-pulse">
-                            <div className="h-2 w-10 bg-[#D4C3A3] rounded-full"></div>
-                            <div className="w-5 h-8 border-2 border-[#D4C3A3] rounded-full"></div>
-                        </div>
-                    </div>
+                    <div className="absolute inset-0 bg-[#EAE5DB] animate-pulse z-0" />
                 )}
 
                 {/* Premium Luxury Gradient Overlay for Text Readability - Dark Brown & Charcoal */}
-                {imagesLoaded && (
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#1E1914]/60 via-transparent to-transparent z-10" />
-                )}
+                <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#1E1914]/60 via-transparent to-transparent z-10" />
 
                 {/* Fading text overlays */}
-                {imagesLoaded && (
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-start max-w-7xl mx-auto px-8 sm:px-16 md:px-24 text-left z-20">
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-start max-w-7xl mx-auto px-8 sm:px-16 md:px-24 text-left z-20">
                         {/* Slide 1: Welcome */}
                         <div 
                             style={{ opacity: getOpacity(0, 0.22), transition: 'opacity 0.2s ease-out' }}
@@ -245,7 +226,6 @@ const Hero = () => {
                             </p>
                         </div>
                     </div>
-                )}
                 
                 {/* Visual scroll indicator */}
                 {imagesLoaded && scrollProgress < 0.95 && (

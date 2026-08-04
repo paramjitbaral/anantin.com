@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import StoreLayout from "@/components/store/StoreLayout";
 import FloatingAssistant from "@/components/FloatingAssistant";
 
