@@ -66,7 +66,7 @@ const Footer = () => {
                         <p className="max-w-[410px] mt-6 text-sm text-[#EAE0D5]/80">Welcome to anantin, your ultimate B2B destination for premium fabrics and textiles. Connecting clothing brands, fashion designers, and textile mills worldwide.</p>
                         <div className="flex items-center gap-3 mt-5">
                             {socialIcons.map((item, i) => (
-                                <Link href={item.link} key={i} className="flex items-center justify-center w-10 h-10 bg-[#3F332A] hover:scale-105 border border-[#4A3B30] transition rounded-full">
+                                <Link href={item.link} key={i} aria-label={item.name || 'Social Link'} className="flex items-center justify-center w-10 h-10 bg-[#3F332A] hover:scale-105 border border-[#4A3B30] transition rounded-full">
                                     <item.icon />
                                 </Link>
                             ))}

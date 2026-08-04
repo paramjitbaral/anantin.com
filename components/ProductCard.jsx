@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
     return (
         <Link href={`/product/${product.id}`} className=' group max-xl:mx-auto block'>
             <div className='bg-[#FDFBF7] h-40 sm:w-60 sm:h-68 rounded-lg overflow-hidden border border-[#EAE0D5] hover:border-[#8C8A85] transition relative group/image'>
-                <Image width={500} height={500} className='w-full h-full object-cover group-hover/image:scale-110 transition duration-300' src={product.images[0]} alt={product.name} />
+                <Image fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px" className='object-cover group-hover/image:scale-110 transition duration-300' src={product.images[0]} alt={product.name} />
                 
                 {/* Hover overlay with Quick Add button */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 flex items-center justify-center">

@@ -59,7 +59,7 @@ const Navbar = () => {
 
                     <Link href="/" className="relative flex items-center gap-3">
                         <div className="relative w-[40px] h-[40px]">
-                            <Image src="/anantin%20logo.png" alt="Anantin Logo" fill className="object-contain transition-all duration-300" />
+                            <Image src="/anantin%20logo.png" alt="Anantin Logo" fill sizes="60px" className="object-contain transition-all duration-300" />
                         </div>
                         {/* Made logo font-bold instead of semibold to pop more */}
                         <div className={`relative text-4xl font-bold transition-colors duration-300 ${isLightText ? 'text-[#FDFBF7]' : 'text-[#2C241B]'}`}>

@@ -103,7 +103,7 @@ export default function FloatingAssistant({ role = 'customer' }) {
                     className="transition-all hover:scale-105 active:scale-95 flex items-center justify-center group relative drop-shadow-xl"
                 >
                     <div className="relative w-16 h-16 group-hover:animate-pulse">
-                        <Image src="/bot%20icon.png" alt="Assistant" fill className="object-contain" />
+                        <Image src="/bot%20icon.png" alt="Assistant" fill sizes="100px" className="object-contain" />
                     </div>
                     {/* Notification Message Icon */}
                     <div className="absolute top-0 -right-2 bg-green-500 text-white text-[9px] font-bold px-1.5 py-[1px] rounded-2xl rounded-bl-none shadow-sm border border-transparent flex items-center justify-center animate-bounce">
@@ -121,7 +121,7 @@ export default function FloatingAssistant({ role = 'customer' }) {
                         <div className="flex items-center gap-3 relative z-10">
                             <div className="relative w-10 h-10 flex items-center justify-center drop-shadow-lg">
                                 <div className="relative w-full h-full">
-                                    <Image src="/bot%20icon.png" alt="Assistant Bot" fill className="object-contain scale-125" />
+                                    <Image src="/bot%20icon.png" alt="Assistant Bot" fill sizes="100px" className="object-contain scale-125" />
                                 </div>
                             </div>
                             <div>

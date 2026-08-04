@@ -13,7 +13,7 @@ export default function PublicLayout({ children }) {
         <>
             {!isAuthPage && <Banner />}
             {!isAuthPage && <Navbar />}
-            {children}
+            <main>{children}</main>
             {!isAuthPage && <Footer />}
             <FloatingAssistant />
         </>
