@@ -25,9 +25,11 @@ const AdminLayout = ({ children }) => {
     ) : isAdmin ? (
         <div className="flex flex-col h-screen bg-[#FDFBF7] overflow-hidden">
             <AdminNavbar />
-            <div className="flex flex-1 h-[calc(100vh-80px)] overflow-hidden relative z-10">
-                <AdminSidebar />
-                <div className="flex-1 h-full overflow-y-auto relative z-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex flex-col sm:flex-row flex-1 h-[calc(100vh-80px)] overflow-hidden relative z-10">
+                <div className="order-2 sm:order-1 z-50 w-full sm:w-auto">
+                    <AdminSidebar />
+                </div>
+                <div className="order-1 sm:order-2 flex-1 h-full w-full overflow-y-auto relative z-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {children}
                 </div>
             </div>

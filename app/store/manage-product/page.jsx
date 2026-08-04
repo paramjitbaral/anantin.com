@@ -148,32 +148,32 @@ export default function StoreManageProducts() {
             <div className="relative z-10 w-full flex flex-col flex-1">
                 
                 {/* Header Section */}
-                <div className="px-12 py-6 border-b border-[#EAE5DB] bg-white/40 backdrop-blur-md flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center relative z-20 shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
+                <div className="px-4 sm:px-12 py-4 sm:py-6 border-b border-[#EAE5DB] bg-white/40 backdrop-blur-md flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center relative z-20 shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
                     {/* Subtle stitching effect */}
                     <div className="absolute bottom-0 left-0 right-0 h-[1px] opacity-15" style={{ background: "radial-gradient(circle at 2px 0, #8b795a 1.5px, transparent 2px) repeat-x", backgroundSize: "6px 6px" }}></div>
                     
-                    <div>
-                        <h2 className="text-xl font-serif font-bold text-[#1a1510] tracking-tight">Product Catalog</h2>
+                    <div className="text-center sm:text-left">
+                        <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#1a1510] tracking-tight">Product Catalog</h2>
                         <p className="text-[10px] font-sans text-[#8b795a] mt-1 tracking-wide uppercase font-medium">{sortedProducts.length} items listed</p>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button onClick={exportToCSV} className="px-4 py-2 text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a] bg-white/80 backdrop-blur-sm border border-[#EAE5DB] rounded-md hover:bg-[#F0EBE1] hover:text-[#2C241B] transition-all shadow-sm">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <button onClick={exportToCSV} className="flex-1 sm:flex-none justify-center px-4 py-2 sm:py-2.5 text-[10px] sm:text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a] bg-white/80 backdrop-blur-sm border border-[#EAE5DB] rounded-md hover:bg-[#F0EBE1] hover:text-[#2C241B] transition-all shadow-sm">
                             Export CSV
                         </button>
-                        <div className="relative" ref={sortDropdownRef}>
+                        <div className="relative flex-1 sm:flex-none" ref={sortDropdownRef}>
                             <button 
                                 onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                                className="px-4 py-2 text-[9px] font-bold uppercase tracking-[0.15em] text-white bg-[#1a1510] rounded-md hover:bg-black shadow-md transition-all relative overflow-hidden group flex items-center gap-2"
+                                className="w-full justify-center px-4 py-2 sm:py-2.5 text-[10px] sm:text-[9px] font-bold uppercase tracking-[0.15em] text-white bg-[#1a1510] rounded-md hover:bg-black shadow-md transition-all relative overflow-hidden group flex items-center gap-2"
                             >
                                 <span className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "url('/denim_plaid_texture.png')" }}></span>
-                                <ArrowUpDownIcon className="w-3 h-3 relative z-10" />
+                                <ArrowUpDownIcon className="w-3.5 h-3.5 sm:w-3 sm:h-3 relative z-10" />
                                 <span className="relative z-10">
                                     {sortBy === "DEFAULT" ? "Sort" : 
                                      sortBy === "PRICE_ASC" ? "Price: Low to High" :
                                      sortBy === "PRICE_DESC" ? "Price: High to Low" : "A to Z"}
                                 </span>
-                                <ChevronDownIcon className={`w-3 h-3 relative z-10 transition-transform ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
+                                <ChevronDownIcon className={`w-3.5 h-3.5 sm:w-3 sm:h-3 relative z-10 transition-transform ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {isSortDropdownOpen && (
@@ -207,17 +207,17 @@ export default function StoreManageProducts() {
                     <table className="w-full text-left bg-transparent">
                         <thead className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#8b795a] bg-white/60 backdrop-blur-md sticky top-0 z-10">
                             <tr>
-                                <th className="px-12 py-6 border-b border-[#EAE5DB]">Product</th>
-                                <th className="px-6 py-6 border-b border-[#EAE5DB] hidden md:table-cell">Category</th>
-                                <th className="px-6 py-6 border-b border-[#EAE5DB]">Price</th>
-                                <th className="px-6 py-6 border-b border-[#EAE5DB] text-center">Stock (Meters)</th>
-                                <th className="px-12 py-6 border-b border-[#EAE5DB] text-center">Actions</th>
+                                <th className="px-4 py-4 sm:px-12 sm:py-6 border-b border-[#EAE5DB]">Product</th>
+                                <th className="px-4 py-4 sm:px-6 sm:py-6 border-b border-[#EAE5DB] hidden md:table-cell">Category</th>
+                                <th className="px-4 py-4 sm:px-6 sm:py-6 border-b border-[#EAE5DB]">Price</th>
+                                <th className="px-4 py-4 sm:px-6 sm:py-6 border-b border-[#EAE5DB] text-center">Stock (Meters)</th>
+                                <th className="px-4 py-4 sm:px-12 sm:py-6 border-b border-[#EAE5DB] text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                                 {sortedProducts.map((product) => (
                                     <tr key={product.id} className="border-b border-[#EAE5DB]/60 last:border-0 hover:bg-white hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 group relative z-0 hover:z-10">
-                                        <td className="px-12 py-6 cursor-pointer group-hover:bg-[#FDFBF7]" onClick={() => openModal(product)}>
+                                        <td className="px-4 py-4 sm:px-12 sm:py-6 cursor-pointer group-hover:bg-[#FDFBF7]" onClick={() => openModal(product)}>
                                             <div className="flex gap-4 items-center">
                                                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#F0EBE1] border border-[#EAE5DB] flex-shrink-0 relative">
                                                     {product.images?.[0] ? (
@@ -232,12 +232,12 @@ export default function StoreManageProducts() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-6 hidden md:table-cell">
+                                        <td className="px-4 py-4 sm:px-6 sm:py-6 hidden md:table-cell">
                                             <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-white border border-[#EAE5DB] text-[#8b795a] text-[10px] font-bold uppercase tracking-widest">
                                                 {product.category}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-6">
+                                        <td className="px-4 py-4 sm:px-6 sm:py-6">
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center font-bold text-[#1f5c35] text-base">
                                                     <span className="mr-1">{currency}</span>
@@ -256,7 +256,7 @@ export default function StoreManageProducts() {
                                                 <span className="text-[10px] text-[#8b795a] line-through ml-1">{currency} {product.mrp.toLocaleString()}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-6 text-center">
+                                        <td className="px-4 py-4 sm:px-6 sm:py-6 text-center">
                                             <div className="inline-flex items-center">
                                                 <input 
                                                     type="number" 
@@ -271,7 +271,7 @@ export default function StoreManageProducts() {
                                                 />
                                             </div>
                                         </td>
-                                        <td className="px-12 py-6 text-center">
+                                        <td className="px-4 py-4 sm:px-12 sm:py-6 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button 
                                                     onClick={() => handleDelete(product.id)}

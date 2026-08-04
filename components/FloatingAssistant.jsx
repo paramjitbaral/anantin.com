@@ -94,8 +94,11 @@ export default function FloatingAssistant({ role = 'customer' }) {
         return null;
     }
 
+    const isDashboard = role === 'supplier' || role === 'admin';
+    const bottomClass = isDashboard ? 'bottom-24 sm:bottom-10' : 'bottom-4 sm:bottom-10';
+
     return (
-        <div ref={popupRef} className="fixed bottom-4 sm:bottom-10 right-4 sm:right-12 z-50 font-sans flex flex-col items-end">
+        <div ref={popupRef} className={`fixed ${bottomClass} right-4 sm:right-12 z-50 font-sans flex flex-col items-end`}>
             {/* Assistant Button */}
             {!isOpen && (
                 <button

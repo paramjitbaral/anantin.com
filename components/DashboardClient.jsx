@@ -124,9 +124,9 @@ export default function DashboardClient({ dailyData, monthlyData, yearlyData, st
         <div className="relative z-10 w-full flex flex-col flex-1 py-2">
             
             {/* Header Section */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 w-full">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6 mb-4 sm:mb-10 w-full">
                 <div>
-                    <h1 className="text-3xl font-serif font-bold text-[#1a1510] tracking-tight">Sales Dashboard</h1>
+                    <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#1a1510] tracking-tight">Sales Dashboard</h1>
                     <p className="text-[#8b795a] mt-1 text-sm">Welcome back, <span className="font-bold text-[#1a1510]">{storeData?.name || 'Partner'}!</span></p>
                 </div>
                 
@@ -238,43 +238,43 @@ export default function DashboardClient({ dailyData, monthlyData, yearlyData, st
             </div>
 
             {/* Main Content Area */}
-            <div className="w-full flex flex-col gap-8">
+            <div className="w-full flex flex-col gap-5 sm:gap-8">
                 
                 {/* View Filters - Instant Client-side switching */}
-                <div className="flex items-center gap-8 border-b border-[#EAE5DB] pb-1">
-                    <span className="text-sm font-bold flex items-center gap-1">Select Views <ChevronDown size={14}/></span>
-                    <div className="flex gap-6">
-                        <button onClick={() => setView('daily')} className={`text-sm pb-2 ${view === 'daily' ? 'font-bold text-[#1a1510] border-b-2 border-[#1a1510]' : 'text-[#8b795a] hover:text-[#1a1510]'}`}>Last 24 Hours</button>
-                        <button onClick={() => setView('monthly')} className={`text-sm pb-2 ${view === 'monthly' ? 'font-bold text-[#1a1510] border-b-2 border-[#1a1510]' : 'text-[#8b795a] hover:text-[#1a1510]'}`}>Monthly View</button>
-                        <button onClick={() => setView('yearly')} className={`text-sm pb-2 ${view === 'yearly' ? 'font-bold text-[#1a1510] border-b-2 border-[#1a1510]' : 'text-[#8b795a] hover:text-[#1a1510]'}`}>Yearly View</button>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 border-b border-[#EAE5DB] pb-2 sm:pb-1 w-full">
+                    <span className="text-xs sm:text-sm font-bold flex items-center gap-1 shrink-0 text-[#8b795a] sm:text-[#1a1510]">Select Views <ChevronDown size={14}/></span>
+                    <div className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar w-full">
+                        <button onClick={() => setView('daily')} className={`text-xs sm:text-sm pb-1 sm:pb-2 shrink-0 ${view === 'daily' ? 'font-bold text-[#1a1510] border-b-2 border-[#1a1510]' : 'text-[#8b795a] hover:text-[#1a1510]'}`}>Last 24 Hours</button>
+                        <button onClick={() => setView('monthly')} className={`text-xs sm:text-sm pb-1 sm:pb-2 shrink-0 ${view === 'monthly' ? 'font-bold text-[#1a1510] border-b-2 border-[#1a1510]' : 'text-[#8b795a] hover:text-[#1a1510]'}`}>Monthly View</button>
+                        <button onClick={() => setView('yearly')} className={`text-xs sm:text-sm pb-1 sm:pb-2 shrink-0 ${view === 'yearly' ? 'font-bold text-[#1a1510] border-b-2 border-[#1a1510]' : 'text-[#8b795a] hover:text-[#1a1510]'}`}>Yearly View</button>
                     </div>
                 </div>
 
                 {/* Metric Cards Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     {dashboardCardsData.map((card, index) => (
-                        <div key={index} className="bg-white rounded-2xl border border-[#EAE5DB] p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className={`w-8 h-8 rounded-lg ${card.bg} flex items-center justify-center ${card.iconColor}`}>
-                                    <card.icon size={16} strokeWidth={2} />
+                        <div key={index} className="bg-white rounded-xl sm:rounded-2xl border border-[#EAE5DB] p-3 sm:p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-shadow hover:shadow-md flex flex-col">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+                                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${card.bg} flex items-center justify-center ${card.iconColor} shrink-0`}>
+                                    <card.icon className="w-4 h-4 sm:w-[16px] sm:h-[16px]" strokeWidth={2} />
                                 </div>
-                                <span className="text-sm font-bold text-[#1a1510]">{card.title}</span>
+                                <span className="text-[11px] sm:text-sm font-bold text-[#1a1510] leading-tight">{card.title}</span>
                             </div>
-                            <div className="flex items-end gap-3 mb-4">
-                                <span className="text-3xl font-bold tracking-tight text-[#1a1510]">{card.value}</span>
-                                <span className={`text-[11px] font-bold flex items-center gap-1 mb-1 ${index === 1 ? 'text-[#d33a3a]' : 'text-[#1f5c35]'}`}>
-                                    {index === 1 ? '↓ 0.4%' : '↑ 12%'} vs last period
+                            <div className="flex flex-col sm:flex-row sm:items-end gap-1 sm:gap-3 mb-3 sm:mb-4 mt-auto">
+                                <span className="text-xl sm:text-3xl font-bold tracking-tight text-[#1a1510] leading-none">{card.value}</span>
+                                <span className={`text-[9px] sm:text-[11px] font-bold flex items-center gap-1 mb-0 sm:mb-1 ${index === 1 ? 'text-[#d33a3a]' : 'text-[#1f5c35]'}`}>
+                                    {index === 1 ? '↓ 0.4%' : '↑ 12%'} <span className="hidden xl:inline">vs last period</span>
                                 </span>
                             </div>
-                            <div className="pt-4 border-t border-[#EAE5DB]/50">
-                                <p className="text-[10px] text-[#8b795a] uppercase tracking-wider font-semibold">Active Period Data</p>
+                            <div className="pt-2 sm:pt-4 border-t border-[#EAE5DB]/50">
+                                <p className="text-[8px] sm:text-[10px] text-[#8b795a] uppercase tracking-wider font-semibold">Active Period <span className="hidden sm:inline">Data</span></p>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Chart & Side Content */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
                     {/* Sales Performance Chart */}
                     <div className="lg:col-span-2 bg-white rounded-2xl border border-[#EAE5DB] p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                         <div className="flex justify-between items-center mb-8">
@@ -319,7 +319,7 @@ export default function DashboardClient({ dailyData, monthlyData, yearlyData, st
                 </div>
 
                 {/* Tables Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                     {/* Product Transactions */}
                     <div className="bg-white rounded-2xl border border-[#EAE5DB] p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                         <div className="flex justify-between items-center mb-6">

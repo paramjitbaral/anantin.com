@@ -21,10 +21,12 @@ export default function Signup() {
         
         try {
             // 1. Sign up with Supabase Auth (handles encryption and email verification)
+            const redirectUrl = `${window.location.origin}/login`
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
+                    emailRedirectTo: redirectUrl,
                     data: {
                         name,
                         role: 'CUSTOMER'

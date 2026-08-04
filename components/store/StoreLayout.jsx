@@ -3,6 +3,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import SellerNavbar from "./StoreNavbar"
+import FloatingAssistant from "@/components/FloatingAssistant"
 import { useEffect, useState } from "react"
 import Loading from "../Loading"
 import SellerSidebar from "./StoreSidebar"
@@ -94,23 +95,26 @@ const StoreLayout = ({ children }) => {
     return loading ? (
         <Loading />
     ) : isSeller ? (
-        <div className="flex flex-col h-screen bg-[#FDFBF7]">
+        <div className="flex flex-col h-screen bg-[#FDFBF7] overflow-hidden">
             <SellerNavbar />
-            <div className="flex flex-1 items-start h-full overflow-hidden">
-                <SellerSidebar storeInfo={storeInfo} />
-                <div className="relative flex-1 h-full overflow-y-auto no-scrollbar bg-[#FDFBF7]">
+            <div className="flex flex-col sm:flex-row flex-1 h-[calc(100vh-80px)] overflow-hidden relative z-10">
+                <div className="order-2 sm:order-1 z-50 w-full sm:w-auto">
+                    <SellerSidebar storeInfo={storeInfo} />
+                </div>
+                <div className="order-1 sm:order-2 flex-1 h-full w-full overflow-y-auto relative z-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url('/denim_plaid_texture.png')", backgroundRepeat: "repeat", backgroundSize: "600px" }}></div>
                     <div className="relative z-10 p-6 lg:p-8 min-h-full flex flex-col">
                         {children}
                     </div>
                 </div>
             </div>
+            <FloatingAssistant role="supplier" />
         </div>
     ) : (
-        <div className="h-screen w-full flex flex-col md:flex-row bg-[#1E1914] overflow-hidden">
+        <div className="min-h-screen md:h-screen w-full flex flex-col md:flex-row bg-[#1E1914] overflow-y-auto md:overflow-hidden">
             
-            {/* Left Side - Brand Focus */}
-            <div className="relative w-full md:w-1/2 bg-[#14100c] flex flex-col justify-between p-8 lg:p-16 shadow-[15px_0_40px_rgba(0,0,0,0.8)] z-20 h-full">
+            {/* Left Side - Brand Focus (Hidden on Mobile) */}
+            <div className="hidden md:flex relative w-full md:w-1/2 bg-[#14100c] flex-col justify-center md:justify-between p-8 lg:p-16 shadow-[0_10px_30px_rgba(0,0,0,0.8)] md:shadow-[15px_0_40px_rgba(0,0,0,0.8)] z-20 min-h-[30vh] md:h-full gap-8 md:gap-0">
                 <div className="absolute inset-0 opacity-40 mix-blend-luminosity">
                     <Image src="/newsletter_fabric.png" alt="Fabric" fill className="object-cover" />
                 </div>
@@ -144,8 +148,21 @@ const StoreLayout = ({ children }) => {
             </div>
             
             {/* Right Side - Artistic Container Frame */}
-            <div className="relative w-full md:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 py-12 bg-[#F4EFE6] z-10 h-full">
+            <div className="relative w-full md:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 py-12 bg-[#F4EFE6] z-10 min-h-[70vh] md:h-full">
                 <div className="absolute inset-0 z-0 opacity-[0.15] pointer-events-none" style={{ backgroundImage: 'url("/newsletter_fabric.png")', backgroundSize: '400px', backgroundRepeat: 'repeat' }} />
+                
+                {/* Mobile Header Logo (Since left side is hidden) */}
+                <div className="md:hidden relative z-10 flex items-center justify-center gap-2 mb-8 mt-2">
+                    <div className="relative w-[35px] h-[35px]">
+                        <Image src="/anantin%20logo.png" alt="Anantin Logo" fill className="object-contain" />
+                    </div>
+                    <div className="relative text-3xl font-semibold text-[#1E1914]">
+                        <span className="text-[#8b795a]">anan</span>tin<span className="text-[#D4B26F] text-4xl leading-0">.</span>
+                        <p className="absolute text-[7px] font-bold uppercase -top-1 -right-[40px] px-2 py-0.5 rounded-full flex items-center gap-1 text-[#FDFBF7] bg-[#1E1914]">
+                            VENDOR
+                        </p>
+                    </div>
+                </div>
                 
                 {/* Outer Dark Frame */}
                 <div className="relative z-10 w-full max-w-[400px] rounded-sm p-[3.5px] bg-[#1E1914] shadow-[0_25px_60px_rgba(0,0,0,0.3)] my-auto">

@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 
 import StoreLayout from "@/components/store/StoreLayout";
-import FloatingAssistant from "@/components/FloatingAssistant";
 
 export const metadata = {
     title: "Anantin. - Store Dashboard",
@@ -11,11 +10,8 @@ export const metadata = {
 export default function RootAdminLayout({ children }) {
 
     return (
-        <>
-            <StoreLayout>
-                {children}
-            </StoreLayout>
-            <FloatingAssistant role="supplier" />
-        </>
+        <StoreLayout>
+            {children}
+        </StoreLayout>
     );
 }

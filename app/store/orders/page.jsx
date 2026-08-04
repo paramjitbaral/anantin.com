@@ -134,28 +134,28 @@ export default function StoreOrders() {
             <div className="relative z-10 w-full flex flex-col flex-1">
                 
                 {/* Header Section */}
-                <div className="px-12 py-6 border-b border-[#EAE5DB] bg-white/40 backdrop-blur-md flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center relative z-20 shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
+                <div className="px-4 sm:px-12 py-4 sm:py-6 border-b border-[#EAE5DB] bg-white/40 backdrop-blur-md flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-center relative z-20 shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
                     {/* Subtle stitching effect */}
                     <div className="absolute bottom-0 left-0 right-0 h-[1px] opacity-15" style={{ background: "radial-gradient(circle at 2px 0, #8b795a 1.5px, transparent 2px) repeat-x", backgroundSize: "6px 6px" }}></div>
                     
-                    <div>
-                        <h2 className="text-xl font-serif font-bold text-[#1a1510] tracking-tight">Incoming Orders</h2>
+                    <div className="text-center sm:text-left">
+                        <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#1a1510] tracking-tight">Incoming Orders</h2>
                         <p className="text-[10px] font-sans text-[#8b795a] mt-1 tracking-wide uppercase font-medium">Manage and track your customer orders ({filteredOrders.length})</p>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <button onClick={exportToCSV} className="px-4 py-2 text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a] bg-white/80 backdrop-blur-sm border border-[#EAE5DB] rounded-md hover:bg-[#F0EBE1] hover:text-[#2C241B] transition-all shadow-sm">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <button onClick={exportToCSV} className="flex-1 sm:flex-none justify-center px-4 py-2 sm:py-2.5 text-[10px] sm:text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a] bg-white/80 backdrop-blur-sm border border-[#EAE5DB] rounded-md hover:bg-[#F0EBE1] hover:text-[#2C241B] transition-all shadow-sm">
                             Export CSV
                         </button>
                         
-                        <div className="relative" ref={filterDropdownRef}>
+                        <div className="relative flex-1 sm:flex-none" ref={filterDropdownRef}>
                             <button 
                                 onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-                                className="px-4 py-2 text-[9px] font-bold uppercase tracking-[0.15em] text-white bg-[#1a1510] rounded-md hover:bg-black shadow-md transition-all relative overflow-hidden group flex items-center gap-2"
+                                className="w-full justify-center px-4 py-2 sm:py-2.5 text-[10px] sm:text-[9px] font-bold uppercase tracking-[0.15em] text-white bg-[#1a1510] rounded-md hover:bg-black shadow-md transition-all relative overflow-hidden group flex items-center gap-2"
                             >
                                 <span className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "url('/denim_plaid_texture.png')" }}></span>
-                                <FilterIcon className="w-3 h-3 relative z-10" />
+                                <FilterIcon className="w-3.5 h-3.5 sm:w-3 sm:h-3 relative z-10" />
                                 <span className="relative z-10">{filterStatus === "ALL" ? "Filter" : filterStatus.replace('_', ' ')}</span>
-                                <ChevronDownIcon className={`w-3 h-3 relative z-10 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`} />
+                                <ChevronDownIcon className={`w-3.5 h-3.5 sm:w-3 sm:h-3 relative z-10 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {isFilterDropdownOpen && (
@@ -180,11 +180,13 @@ export default function StoreOrders() {
                     </div>
                 </div>
                 
-                <div className="overflow-x-auto w-full relative z-10 flex-1">
-                    <table className="w-full text-left bg-transparent">
-                        <thead className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#8b795a] bg-white/60 backdrop-blur-md sticky top-0 z-10">
-                            <tr>
-                                <th className="px-12 py-6 border-b border-[#EAE5DB]">Order ID</th>
+                <div className="w-full relative z-10 flex-1 px-4 py-4 sm:px-0 sm:py-0 overflow-y-auto">
+                    {/* Desktop View Table */}
+                    <div className="hidden sm:block overflow-x-auto w-full">
+                        <table className="w-full text-left bg-transparent">
+                            <thead className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#8b795a] bg-white/60 backdrop-blur-md sticky top-0 z-10">
+                                <tr>
+                                    <th className="px-12 py-6 border-b border-[#EAE5DB]">Order ID</th>
                                     <th className="px-6 py-6 border-b border-[#EAE5DB]">Customer</th>
                                     <th className="px-6 py-6 border-b border-[#EAE5DB]">Date</th>
                                     <th className="px-6 py-6 border-b border-[#EAE5DB]">Total</th>
@@ -251,13 +253,88 @@ export default function StoreOrders() {
                                 ))}
                             </tbody>
                         </table>
-                        
-                        {filteredOrders.length === 0 && (
-                            <div className="py-16 flex flex-col items-center justify-center text-[#8b795a]">
-                                <p className="text-sm font-serif">{orders.length === 0 ? "No orders yet." : "No orders found matching this filter."}</p>
-                            </div>
-                        )}
                     </div>
+
+                    {/* Mobile View Card List */}
+                    <div className="sm:hidden flex flex-col gap-4 pb-24">
+                        {filteredOrders.map((order) => (
+                            <div 
+                                key={order.id} 
+                                className="bg-white border border-[#EAE5DB] rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col gap-3"
+                                onClick={() => openModal(order)}
+                            >
+                                <span className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: "url('/denim_plaid_texture.png')" }}></span>
+                                
+                                {/* Header of Card */}
+                                <div className="flex justify-between items-center border-b border-[#EAE5DB]/50 pb-2">
+                                    <span className="font-mono font-bold text-[#1a1510] tracking-widest text-[12px]">
+                                        #{order.id.slice(-6).toUpperCase()}
+                                    </span>
+                                    <span className="text-[#8b795a] text-[11px] font-medium">
+                                        {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </span>
+                                </div>
+
+                                {/* Customer Info */}
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a]">Customer</span>
+                                    <span className="font-bold text-[#1a1510] text-[14px]">{order.user?.name || 'Guest'}</span>
+                                    <span className="text-[12px] font-medium text-[#8b795a]">{order.address?.city || 'No Location'}</span>
+                                </div>
+
+                                {/* Order Amount and Payment Status */}
+                                <div className="flex justify-between items-center bg-[#FDFBF7] p-2.5 rounded-lg border border-[#EAE5DB]/50">
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a]">Grand Total</span>
+                                        <span className="font-extrabold text-[#1a1510] text-[16px]">{currency}{order.total.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#8b795a]">Payment</span>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${order.isPaid ? 'bg-green-500' : 'bg-orange-400'}`}></div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-[#4A3F35]">
+                                                {order.paymentMethod}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Status Selector and Detail Button */}
+                                <div className="flex items-center gap-3 mt-1" onClick={(e) => e.stopPropagation()}>
+                                    <div className="relative flex-1">
+                                        <select
+                                            value={order.status}
+                                            onChange={e => handleUpdateStatus(order.id, e.target.value)}
+                                            className={`w-full text-[10px] font-bold uppercase tracking-[0.2em] px-4 py-2.5 rounded-md border outline-none appearance-none cursor-pointer transition-all ${statusColors[order.status] || "bg-gray-100 text-gray-700 border-gray-200"} hover:shadow-sm`}
+                                        >
+                                            <option value="ORDER_PLACED">PLACED</option>
+                                            <option value="PROCESSING">PROCESSING</option>
+                                            <option value="SHIPPED">SHIPPED</option>
+                                            <option value="DELIVERED">DELIVERED</option>
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                            <svg className="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => openModal(order)}
+                                        className="flex items-center justify-center h-10 px-4 gap-2 text-[#8b795a] hover:text-[#1a1510] bg-[#F0EBE1]/60 hover:bg-[#F0EBE1] border border-[#EAE5DB] rounded-md transition-colors text-[10px] font-bold uppercase tracking-widest"
+                                        title="View Details"
+                                    >
+                                        <EyeIcon className="w-4 h-4" />
+                                        <span>View</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {filteredOrders.length === 0 && (
+                        <div className="py-16 flex flex-col items-center justify-center text-[#8b795a]">
+                            <p className="text-sm font-serif">{orders.length === 0 ? "No orders yet." : "No orders found matching this filter."}</p>
+                        </div>
+                    )}
+                </div>
                 </div>
 
             {/* Premium Modal */}
