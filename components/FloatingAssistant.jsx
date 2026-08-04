@@ -95,7 +95,7 @@ export default function FloatingAssistant({ role = 'customer' }) {
     }, [messages, isLoading, router]);
 
     return (
-        <div ref={popupRef} className="fixed bottom-10 right-12 z-50 font-sans">
+        <div ref={popupRef} className="fixed bottom-4 sm:bottom-10 right-4 sm:right-12 z-50 font-sans flex flex-col items-end">
             {/* Assistant Button */}
             {!isOpen && (
                 <button
@@ -114,7 +114,7 @@ export default function FloatingAssistant({ role = 'customer' }) {
 
             {/* Popup Container */}
             {isOpen && (
-                <div className="bg-[#FDFBF7] w-80 sm:w-96 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] border border-[#EAE0D5] flex flex-col overflow-hidden transform transition-all duration-300 origin-bottom-right">
+                <div className="bg-[#FDFBF7] w-[calc(100vw-2rem)] sm:w-96 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.2)] border border-[#EAE0D5] flex flex-col overflow-hidden transform transition-all duration-300 origin-bottom-right">
 
                     <div className="bg-[#2C241B] text-white p-4 flex justify-between items-center relative overflow-hidden bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('/denim_plaid_texture.png')" }}>
                         <div className="absolute top-0 left-0 right-0 h-1 opacity-20" style={{ background: "radial-gradient(circle at 5px 0, transparent 5px, white 6px) repeat-x", backgroundSize: "10px 10px" }}></div>
