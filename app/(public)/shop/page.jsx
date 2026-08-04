@@ -165,11 +165,17 @@ function ShopContent() {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }))
     }
 
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+    const [isMobileSortOpen, setIsMobileSortOpen] = useState(false)
+
     // Toggle Handlers
     const toggleArrayItem = (setState, item) => {
         setState(prev => 
             prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
         )
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setIsMobileFiltersOpen(false)
+        }
     }
 
     const clearAllFilters = () => {
@@ -181,18 +187,182 @@ function ShopContent() {
         if (urlSearch || urlCategory) {
             router.push('/shop')
         }
+        setIsMobileFiltersOpen(false)
     }
+
+    const renderFilterContent = () => (
+        <div className="flex flex-col">
+            
+            {/* Categories */}
+            <div className="border-b border-[#EAE0D5] py-4">
+                <button onClick={() => toggleSection('fabric')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
+                    Fabric
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.fabric ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.fabric && (
+                    <div className="flex flex-col gap-2.5 mt-4">
+                        <div className="relative mb-2">
+                            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C8A85]" />
+                            <input type="text" placeholder="Search Fabric..." value={fabricSearch} onChange={(e) => setFabricSearch(e.target.value)} className="w-full text-[11px] border border-[#EAE0D5] rounded-full py-1.5 pl-8 pr-3 outline-none focus:border-[#D4B26F] text-[#2C241B] placeholder-[#8C8A85]" />
+                        </div>
+                        {categories.filter(c => c.toLowerCase().startsWith(fabricSearch.toLowerCase())).map((cat, idx) => (
+                            <div key={idx} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleArrayItem(setSelectedCategories, cat)}>
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${selectedCategories.includes(cat) ? 'bg-[#2C241B] border-[#2C241B]' : 'border-[#EAE0D5] group-hover:border-[#D4B26F]'}`}>
+                                    {selectedCategories.includes(cat) && <Check size={12} className="text-white" />}
+                                </div>
+                                <span className={`text-[13px] truncate transition-colors ${selectedCategories.includes(cat) ? 'text-[#2C241B] font-medium' : 'text-[#8C8A85] group-hover:text-[#2C241B]'}`}>
+                                    {cat}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Price Range */}
+            <div className="border-b border-[#EAE0D5] py-4">
+                <button onClick={() => toggleSection('price')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
+                    Max Price
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.price ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.price && (
+                    <div className="mt-4 px-1">
+                        <h4 className="text-[11px] font-bold text-[#2C241B] mb-2">₹{maxPriceFilter}</h4>
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max={maxProductPrice} 
+                            step="50"
+                            value={maxPriceFilter} 
+                            onChange={(e) => setMaxPriceFilter(Number(e.target.value))}
+                            className="w-full accent-[#2C241B] cursor-pointer"
+                        />
+                        <div className="flex justify-between text-[10px] text-[#8C8A85] mt-1 font-medium">
+                            <span>₹0</span>
+                            <span>₹{maxProductPrice}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Colors */}
+            <div className="border-b border-[#EAE0D5] py-4">
+                <button onClick={() => toggleSection('color')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
+                    Color
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.color ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.color && (
+                    <div className="flex flex-col gap-2.5 mt-4">
+                        <div className="relative mb-2">
+                            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C8A85]" />
+                            <input type="text" placeholder="Search Color..." value={colorSearch} onChange={(e) => setColorSearch(e.target.value)} className="w-full text-[11px] border border-[#EAE0D5] rounded-full py-1.5 pl-8 pr-3 outline-none focus:border-[#D4B26F] text-[#2C241B] placeholder-[#8C8A85]" />
+                        </div>
+                        {colors.filter(c => c.toLowerCase().startsWith(colorSearch.toLowerCase())).map((color, idx) => (
+                            <div key={idx} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleArrayItem(setSelectedColors, color)}>
+                                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${selectedColors.includes(color) ? 'bg-[#2C241B] border-[#2C241B]' : 'border-[#EAE0D5] group-hover:border-[#D4B26F]'}`}>
+                                    {selectedColors.includes(color) && <Check size={12} className="text-white" />}
+                                </div>
+                                <span className={`text-[13px] truncate transition-colors ${selectedColors.includes(color) ? 'text-[#2C241B] font-medium' : 'text-[#8C8A85] group-hover:text-[#2C241B]'}`}>
+                                    {color}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* GSM */}
+            <div className="py-4">
+                <button onClick={() => toggleSection('gsm')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
+                    Weight (GSM)
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.gsm ? 'rotate-180' : ''}`} />
+                </button>
+                {openSections.gsm && (
+                    <div className="flex flex-col gap-2.5 mt-4">
+                        <div className="relative mb-2">
+                            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C8A85]" />
+                            <input type="text" placeholder="Search Weight..." value={gsmSearch} onChange={(e) => setGsmSearch(e.target.value)} className="w-full text-[11px] border border-[#EAE0D5] rounded-full py-1.5 pl-8 pr-3 outline-none focus:border-[#D4B26F] text-[#2C241B] placeholder-[#8C8A85]" />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {gsms.filter(g => g.toLowerCase().startsWith(gsmSearch.toLowerCase())).map((gsm, idx) => (
+                                <button 
+                                    key={idx}
+                                    onClick={() => toggleArrayItem(setSelectedGsms, gsm)}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded border transition-all ${
+                                        selectedGsms.includes(gsm) 
+                                            ? 'bg-[#2C241B] text-white border-[#2C241B]' 
+                                            : 'bg-white text-[#8C8A85] border-[#EAE0D5] hover:border-[#D4B26F] hover:text-[#2C241B]'
+                                    }`}
+                                >
+                                    {gsm}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+        </div>
+    )
 
     return (
         <div className="min-h-[70vh] w-full bg-[#FAF8F5]">
+
+            {/* MOBILE STICKY ACTION BAR */}
+            <div className="lg:hidden sticky top-[72px] z-50 w-full relative">
+                {/* The Bar */}
+                <div className="bg-white/90 backdrop-blur-md border-y border-[#EAE0D5] flex shadow-sm w-full relative z-20">
+                    <button onClick={() => { setIsMobileFiltersOpen(!isMobileFiltersOpen); setIsMobileSortOpen(false); }} className={`flex-1 py-3.5 flex items-center justify-center gap-2 border-r border-[#EAE0D5] text-[11px] font-bold tracking-widest uppercase outline-none transition-all ${isMobileFiltersOpen ? 'bg-[#2C241B] text-white' : 'text-[#2C241B] hover:bg-gray-50'}`}>
+                        <Filter size={14} /> Filters
+                    </button>
+                    <button onClick={() => { setIsMobileSortOpen(!isMobileSortOpen); setIsMobileFiltersOpen(false); }} className={`flex-1 py-3.5 flex items-center justify-center gap-2 text-[11px] font-bold tracking-widest uppercase outline-none transition-all ${isMobileSortOpen ? 'bg-[#2C241B] text-white' : 'text-[#2C241B] hover:bg-gray-50'}`}>
+                        Sort By <ChevronDown size={14} className={`transition-transform ${isMobileSortOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                </div>
+
+                {/* MOBILE SORT DROPDOWN (Positioned relative to sticky bar) */}
+                {isMobileSortOpen && (
+                    <div className="absolute left-4 right-4 top-full mt-2 z-30 bg-white/95 backdrop-blur-xl border border-[#EAE0D5] rounded-xl shadow-2xl flex flex-col overflow-hidden">
+                        {[
+                            { value: 'relevance', label: 'Relevance' },
+                            { value: 'price-asc', label: 'Price: Low to High' },
+                            { value: 'price-desc', label: 'Price: High to Low' },
+                            { value: 'newest', label: 'Newest Arrivals' }
+                        ].map(option => (
+                            <button 
+                                key={option.value}
+                                onClick={() => { setSortBy(option.value); setIsMobileSortOpen(false); }}
+                                className={`p-4 text-xs tracking-widest uppercase font-bold text-left border-b border-[#EAE0D5]/50 last:border-b-0 transition-colors ${sortBy === option.value ? 'bg-[#2C241B] text-white' : 'text-[#2C241B] hover:bg-[#FAF8F5]'}`}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* MOBILE FILTER DROPDOWN (Positioned relative to sticky bar) */}
+                {isMobileFiltersOpen && (
+                    <div className="absolute left-4 right-4 top-full mt-2 z-30 bg-white/95 backdrop-blur-xl border border-[#EAE0D5] rounded-xl p-6 shadow-2xl max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
+                        {renderFilterContent()}
+                    </div>
+                )}
+            </div>
+
+            {/* MOBILE DROPDOWN OVERLAYS */}
+            {(isMobileFiltersOpen || isMobileSortOpen) && (
+                <div 
+                    className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" 
+                    onClick={() => { setIsMobileFiltersOpen(false); setIsMobileSortOpen(false); }}
+                ></div>
+            )}
 
 
             {/* Main Content: Sidebar + Products */}
             <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8 lg:gap-12">
                 
-                {/* Left Sidebar (Filters) */}
-                <div className="w-full lg:w-64 shrink-0 bg-white p-6 rounded-xl shadow-sm border border-[#EAE0D5] h-fit lg:sticky lg:top-28">
-                    <div className="flex items-center justify-between mb-2 pb-4 border-b border-[#EAE0D5]">
+                {/* Left Sidebar (Filters - Desktop Only) */}
+                <div className="shrink-0 lg:w-64 lg:bg-white lg:p-6 lg:rounded-xl lg:shadow-sm lg:border lg:border-[#EAE0D5] h-fit lg:sticky lg:top-28 hidden lg:block w-full">
+                    <div className="hidden lg:flex items-center justify-between mb-4">
                         <h3 className="text-sm uppercase tracking-[0.1em] font-bold text-[#2C241B] flex items-center gap-2">
                             <Filter size={16} /> Filters
                         </h3>
@@ -201,118 +371,7 @@ function ShopContent() {
                         </button>
                     </div>
 
-                    <div className="flex flex-col">
-                        
-                        {/* Categories */}
-                        <div className="border-b border-[#EAE0D5] py-4">
-                            <button onClick={() => toggleSection('fabric')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
-                                Fabric
-                                <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.fabric ? 'rotate-180' : ''}`} />
-                            </button>
-                            {openSections.fabric && (
-                                <div className="flex flex-col gap-2.5 mt-4">
-                                    <div className="relative mb-2">
-                                        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C8A85]" />
-                                        <input type="text" placeholder="Search Fabric..." value={fabricSearch} onChange={(e) => setFabricSearch(e.target.value)} className="w-full text-[11px] border border-[#EAE0D5] rounded-full py-1.5 pl-8 pr-3 outline-none focus:border-[#D4B26F] text-[#2C241B] placeholder-[#8C8A85]" />
-                                    </div>
-                                    {categories.filter(c => c.toLowerCase().startsWith(fabricSearch.toLowerCase())).map((cat, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleArrayItem(setSelectedCategories, cat)}>
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${selectedCategories.includes(cat) ? 'bg-[#2C241B] border-[#2C241B]' : 'border-[#EAE0D5] group-hover:border-[#D4B26F]'}`}>
-                                                {selectedCategories.includes(cat) && <Check size={12} className="text-white" />}
-                                            </div>
-                                            <span className={`text-[13px] truncate transition-colors ${selectedCategories.includes(cat) ? 'text-[#2C241B] font-medium' : 'text-[#8C8A85] group-hover:text-[#2C241B]'}`}>
-                                                {cat}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Price Range */}
-                        <div className="border-b border-[#EAE0D5] py-4">
-                            <button onClick={() => toggleSection('price')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
-                                Max Price
-                                <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.price ? 'rotate-180' : ''}`} />
-                            </button>
-                            {openSections.price && (
-                                <div className="mt-4 px-1">
-                                    <h4 className="text-[11px] font-bold text-[#2C241B] mb-2">₹{maxPriceFilter}</h4>
-                                    <input 
-                                        type="range" 
-                                        min="0" 
-                                        max={maxProductPrice} 
-                                        step="50"
-                                        value={maxPriceFilter} 
-                                        onChange={(e) => setMaxPriceFilter(Number(e.target.value))}
-                                        className="w-full accent-[#2C241B] cursor-pointer"
-                                    />
-                                    <div className="flex justify-between text-[10px] text-[#8C8A85] mt-1 font-medium">
-                                        <span>₹0</span>
-                                        <span>₹{maxProductPrice}</span>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Colors */}
-                        <div className="border-b border-[#EAE0D5] py-4">
-                            <button onClick={() => toggleSection('color')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
-                                Color
-                                <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.color ? 'rotate-180' : ''}`} />
-                            </button>
-                            {openSections.color && (
-                                <div className="flex flex-col gap-2.5 mt-4">
-                                    <div className="relative mb-2">
-                                        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C8A85]" />
-                                        <input type="text" placeholder="Search Color..." value={colorSearch} onChange={(e) => setColorSearch(e.target.value)} className="w-full text-[11px] border border-[#EAE0D5] rounded-full py-1.5 pl-8 pr-3 outline-none focus:border-[#D4B26F] text-[#2C241B] placeholder-[#8C8A85]" />
-                                    </div>
-                                    {colors.filter(c => c.toLowerCase().startsWith(colorSearch.toLowerCase())).map((color, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 cursor-pointer group" onClick={() => toggleArrayItem(setSelectedColors, color)}>
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${selectedColors.includes(color) ? 'bg-[#2C241B] border-[#2C241B]' : 'border-[#EAE0D5] group-hover:border-[#D4B26F]'}`}>
-                                                {selectedColors.includes(color) && <Check size={12} className="text-white" />}
-                                            </div>
-                                            <span className={`text-[13px] truncate transition-colors ${selectedColors.includes(color) ? 'text-[#2C241B] font-medium' : 'text-[#8C8A85] group-hover:text-[#2C241B]'}`}>
-                                                {color}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* GSM */}
-                        <div className="py-4">
-                            <button onClick={() => toggleSection('gsm')} className="w-full flex items-center justify-between text-xs uppercase tracking-widest font-bold text-[#8C8A85] hover:text-[#2C241B] transition-colors">
-                                Weight (GSM)
-                                <ChevronDown size={14} className={`transition-transform duration-300 ${openSections.gsm ? 'rotate-180' : ''}`} />
-                            </button>
-                            {openSections.gsm && (
-                                <div className="flex flex-col gap-2.5 mt-4">
-                                    <div className="relative mb-2">
-                                        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C8A85]" />
-                                        <input type="text" placeholder="Search Weight..." value={gsmSearch} onChange={(e) => setGsmSearch(e.target.value)} className="w-full text-[11px] border border-[#EAE0D5] rounded-full py-1.5 pl-8 pr-3 outline-none focus:border-[#D4B26F] text-[#2C241B] placeholder-[#8C8A85]" />
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {gsms.filter(g => g.toLowerCase().startsWith(gsmSearch.toLowerCase())).map((gsm, idx) => (
-                                            <button 
-                                                key={idx}
-                                                onClick={() => toggleArrayItem(setSelectedGsms, gsm)}
-                                                className={`px-3 py-1.5 text-xs font-medium rounded border transition-all ${
-                                                    selectedGsms.includes(gsm) 
-                                                        ? 'bg-[#2C241B] text-white border-[#2C241B]' 
-                                                        : 'bg-white text-[#8C8A85] border-[#EAE0D5] hover:border-[#D4B26F] hover:text-[#2C241B]'
-                                                }`}
-                                            >
-                                                {gsm}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                    </div>
+                    {renderFilterContent()}
                 </div>
 
                 {/* Right Content (Products & Sorting) */}
@@ -322,12 +381,20 @@ function ShopContent() {
 
                     {/* Top Action Bar */}
                     <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-[#EAE0D5] gap-4">
-                        <p className="text-sm text-[#8C8A85] font-medium">
-                            Showing <strong className="text-[#2C241B]">{filteredAndSortedProducts.length}</strong> products
-                        </p>
+                        <div className="w-full flex justify-between sm:justify-start items-center gap-4">
+                            <p className="text-sm text-[#8C8A85] font-medium text-center sm:text-left w-full sm:w-auto">
+                                Showing <strong className="text-[#2C241B]">{filteredAndSortedProducts.length}</strong> products
+                            </p>
+                            {/* Clear All for Mobile (Shown when filters are applied) */}
+                            {isMobileFiltersOpen && (
+                                <button onClick={clearAllFilters} className="lg:hidden text-[10px] uppercase tracking-widest text-[#D4B26F] hover:text-[#2C241B] font-semibold transition-colors shrink-0">
+                                    Clear All
+                                </button>
+                            )}
+                        </div>
                         
-                        <div className="flex items-center gap-3">
-                            <span className="text-xs uppercase tracking-widest font-bold text-[#8C8A85]">Sort By:</span>
+                        <div className="hidden lg:flex items-center gap-3 shrink-0">
+                            <span className="text-xs uppercase tracking-widest font-bold text-[#8C8A85] whitespace-nowrap">Sort By:</span>
                             <div className="relative">
                                 <select 
                                     value={sortBy}

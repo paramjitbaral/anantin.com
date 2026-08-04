@@ -142,7 +142,7 @@ const ProductDetails = ({ product }) => {
                         </div>
                         <div className="flex flex-col items-center gap-2">
                             <UserIcon size={20} className="text-[#D4B26F]" strokeWidth={1.5} />
-                            <span className="text-[10px] uppercase tracking-widest font-bold text-[#2C241B] leading-tight">Trusted Brand</span>
+                            <span className="text-[10px] uppercase tracking-widest font-bold text-[#2C241B] leading-tight">Trusted <br className="sm:hidden" />Brand</span>
                         </div>
                     </div>
 
