@@ -38,20 +38,27 @@ export async function placeOrder(orderData) {
             });
         }
 
-        // Create the address in the DB
-        const dbAddress = await prisma.address.create({
-            data: {
-                userId: user.id,
-                name: address.name,
-                email: address.email,
-                street: address.street,
-                city: address.city,
-                state: address.state,
-                zip: String(address.zip),
-                country: address.country,
-                phone: String(address.phone)
-            }
-        });
+        // Reuse existing address if it exists, otherwise create it in the DB
+        let dbAddress = null;
+        if (address.id) {
+            dbAddress = await prisma.address.findUnique({ where: { id: address.id } });
+        }
+
+        if (!dbAddress) {
+            dbAddress = await prisma.address.create({
+                data: {
+                    userId: user.id,
+                    name: address.name,
+                    email: address.email,
+                    street: address.street,
+                    city: address.city,
+                    state: address.state,
+                    zip: String(address.zip),
+                    country: address.country,
+                    phone: String(address.phone)
+                }
+            });
+        }
 
         // We need to group items by storeId because an order in our schema belongs to ONE store.
         // If a cart has items from multiple stores, we have to create multiple orders.
