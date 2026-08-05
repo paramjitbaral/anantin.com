@@ -2,6 +2,42 @@ import { streamText, tool } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
 
+// Simple in-memory sliding window rate limiter
+const ipCache = new Map();
+
+function isRateLimited(ip, limit = 8, windowMs = 60000) {
+    const now = Date.now();
+    if (!ipCache.has(ip)) {
+        ipCache.set(ip, []);
+    }
+    
+    // Filter out requests older than the sliding window
+    const requests = ipCache.get(ip).filter(timestamp => now - timestamp < windowMs);
+    
+    if (requests.length >= limit) {
+        return true;
+    }
+    
+    requests.push(now);
+    ipCache.set(ip, requests);
+    return false;
+}
+
+// Periodically clean cache to prevent memory leaks in the Node runtime
+if (typeof global.ipCacheCleanupInterval === 'undefined') {
+    global.ipCacheCleanupInterval = setInterval(() => {
+        const now = Date.now();
+        for (const [ip, timestamps] of ipCache.entries()) {
+            const valid = timestamps.filter(timestamp => now - timestamp < 60000);
+            if (valid.length === 0) {
+                ipCache.delete(ip);
+            } else {
+                ipCache.set(ip, valid);
+            }
+        }
+    }, 600000);
+}
+
 const openrouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -11,6 +47,16 @@ export const maxDuration = 30;
 
 export async function POST(req) {
     try {
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+        
+        // Apply rate limit check (8 requests per minute)
+        if (isRateLimited(ip, 8, 60000)) {
+            return new Response(
+                JSON.stringify({ error: "Too many messages sent. Please wait a minute and try again." }), 
+                { status: 429, headers: { 'Content-Type': 'application/json' } }
+            );
+        }
+
         const { messages, role } = await req.json();
 
         const customerPrompt = `You are Anantin Concierge, a high-end, highly polite, and extremely helpful AI styling assistant for a bespoke luxury brand named "Anantin". You help users find the perfect fabrics, track orders, navigate the store, and answer general styling questions.
