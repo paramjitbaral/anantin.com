@@ -169,15 +169,18 @@ const Hero = () => {
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-[#1E1914]/60 via-transparent to-transparent z-10" />
 
                 {/* Fading text overlays */}
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-start max-w-7xl mx-auto px-8 sm:px-16 md:px-24 text-left z-20">
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center max-w-7xl mx-auto px-8 sm:px-16 md:px-24 text-center z-20">
                         {/* Slide 1: Welcome */}
                         <div 
                             style={{ opacity: getOpacity(0, 0.22), transition: 'opacity 0.2s ease-out' }}
-                            className="absolute flex flex-col items-start max-w-md text-[#FDFBF7]"
+                            className="absolute flex flex-col items-center w-full px-4 text-[#FDFBF7]"
                         >
                             <span className="text-xs uppercase tracking-[0.25em] font-bold mb-3 text-[#D4B26F]">APEX TEXTILE MILLS</span>
-                            <h2 className="text-4xl sm:text-6xl font-light tracking-tight leading-tight">
-                                Pure Italian Silk Collection
+                            <h2 
+                                className="text-4xl sm:text-6xl font-bold uppercase tracking-widest leading-none text-transparent mb-2 text-center w-full"
+                                style={{ fontFamily: '"Syncopate", sans-serif', WebkitTextStroke: '1px rgba(255, 255, 255, 0.6)', textShadow: '0 4px 10px rgba(0, 0, 0, 0.15)' }}
+                            >
+                                Pure Italian Silk<br />Collection
                             </h2>
                             <p className="text-sm mt-4 max-w-sm text-[#FDFBF7]/90 font-medium tracking-wide leading-relaxed">
                                 Scroll down to explore raw materials spinning into premium craftsmanship.
@@ -187,11 +190,14 @@ const Hero = () => {
                         {/* Slide 2: Fabric Material */}
                         <div 
                             style={{ opacity: getOpacity(0.28, 0.52), transition: 'opacity 0.2s ease-out' }}
-                            className="absolute flex flex-col items-start max-w-md text-[#FDFBF7]"
+                            className="absolute flex flex-col items-center w-full px-4 text-[#FDFBF7]"
                         >
                             <span className="text-xs uppercase tracking-[0.25em] font-bold mb-3 text-[#D4B26F]">CRAFTED FROM NATURE</span>
-                            <h2 className="text-4xl sm:text-6xl font-light tracking-tight leading-tight">
-                                Woven from 100% Raw Fiber
+                            <h2 
+                                className="text-4xl sm:text-6xl font-bold uppercase tracking-widest leading-none text-transparent mb-2 text-center w-full"
+                                style={{ fontFamily: '"Syncopate", sans-serif', WebkitTextStroke: '1px rgba(255, 255, 255, 0.6)', textShadow: '0 4px 10px rgba(0, 0, 0, 0.15)' }}
+                            >
+                                Woven from<br />100% Raw Fiber
                             </h2>
                             <p className="text-sm mt-4 max-w-sm text-[#FDFBF7]/90 font-medium tracking-wide leading-relaxed">
                                 Ethically sourced and spun with precision weight for luxury tailoring.
@@ -201,11 +207,14 @@ const Hero = () => {
                         {/* Slide 3: Quality Details */}
                         <div 
                             style={{ opacity: getOpacity(0.58, 0.82), transition: 'opacity 0.2s ease-out' }}
-                            className="absolute flex flex-col items-start max-w-md text-[#FDFBF7]"
+                            className="absolute flex flex-col items-center w-full px-4 text-[#FDFBF7]"
                         >
                             <span className="text-xs uppercase tracking-[0.25em] font-bold mb-3 text-[#D4B26F]">UNRIVALED STANDARD</span>
-                            <h2 className="text-4xl sm:text-6xl font-light tracking-tight leading-tight">
-                                Density & Strength Perfected
+                            <h2 
+                                className="text-4xl sm:text-6xl font-bold uppercase tracking-widest leading-none text-transparent mb-2 text-center w-full"
+                                style={{ fontFamily: '"Syncopate", sans-serif', WebkitTextStroke: '1px rgba(255, 255, 255, 0.6)', textShadow: '0 4px 10px rgba(0, 0, 0, 0.15)' }}
+                            >
+                                Density &amp; Strength<br />Perfected
                             </h2>
                             <p className="text-sm mt-4 max-w-sm text-[#FDFBF7]/90 font-medium tracking-wide leading-relaxed">
                                 High-thread fabrics engineered for garment makers, wholesalers, and designers.
@@ -215,11 +224,14 @@ const Hero = () => {
                         {/* Slide 4: CTA Call */}
                         <div 
                             style={{ opacity: getOpacity(0.88, 1), transition: 'opacity 0.2s ease-out' }}
-                            className="absolute flex flex-col items-start max-w-md text-[#FDFBF7]"
+                            className="absolute flex flex-col items-center w-full px-4 text-[#FDFBF7]"
                         >
                             <span className="text-xs uppercase tracking-[0.25em] font-bold mb-3 text-[#D4B26F]">READY TO ORDER</span>
-                            <h2 className="text-4xl sm:text-6xl font-light tracking-tight leading-tight">
-                                Explore Our Catalog Below
+                            <h2 
+                                className="text-4xl sm:text-6xl font-bold uppercase tracking-widest leading-none text-transparent mb-2 text-center w-full"
+                                style={{ fontFamily: '"Syncopate", sans-serif', WebkitTextStroke: '1px rgba(255, 255, 255, 0.6)', textShadow: '0 4px 10px rgba(0, 0, 0, 0.15)' }}
+                            >
+                                Explore Our<br />Catalog Below
                             </h2>
                             <p className="text-sm mt-4 max-w-sm text-[#FDFBF7]/90 font-medium tracking-wide leading-relaxed">
                                 Wholesale pricing and direct mills sourcing starts right here.
